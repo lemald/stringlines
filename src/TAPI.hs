@@ -12,7 +12,7 @@ import Data.Text
 import Data.Time (UTCTime)
 import Servant.API
 
-type VehicleAPI = Capture "APIKey" Text :> "vehicles" :> QueryParam "filter[route]" RouteID :> Get '[JSON] [APIResponse]
+type VehicleAPI = Capture "APIKey" Text :> "vehicles" :> QueryParam "filter[route]" RouteID :> Get '[JSON] APIResponse
 
 type RouteID = Text
 
@@ -21,7 +21,7 @@ data APIResponse = APIResponse {
 } deriving Generic
 
 data Vehicle = Vehicle {
-  id :: String
+  id :: Text
 } deriving Generic
 
 instance FromJSON APIResponse where
