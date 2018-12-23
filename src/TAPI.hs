@@ -12,17 +12,17 @@ import Data.Text
 import Data.Time (UTCTime)
 import Servant.API
 
-type VehicleAPI = Capture "APIKey" Text :> "vehicles" :> QueryParam "filter[route]" RouteID :> Get '[JSON] APIResponse
+type VehicleAPI = "vehicles" :> QueryParam "api-key" Text :> QueryParam "filter[route]" RouteID :> Get '[JSON] APIResponse
 
 type RouteID = Text
 
 data APIResponse = APIResponse {
   payload :: [Vehicle]
-} deriving Generic
+} deriving (Generic, Show)
 
 data Vehicle = Vehicle {
   id :: Text
-} deriving Generic
+} deriving (Generic, Show)
 
 instance FromJSON APIResponse where
   parseJSON = withObject "apiresponse" $ \o -> do
