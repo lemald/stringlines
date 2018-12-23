@@ -19,10 +19,13 @@ vehicles :: Maybe Text         -- API key
 
 vehicles = client api
 
-getVehicles :: TAPI.RouteID -> ClientM (APIResponse)
-getVehicles route = vehicles (Just "***REMOVED***") (Just route)
+apiKey :: Text
+apiKey = "***REMOVED***"
 
-queryAPI :: ClientM (APIResponse) -> IO(Either ServantError APIResponse)
+getVehicles :: TAPI.RouteID -> ClientM (APIResponse)
+getVehicles route = vehicles (Just apiKey) (Just route)
+
+queryAPI :: ClientM (APIResponse) -> IO (Either ServantError APIResponse)
 queryAPI queryFunc = do
   manager <- newManager tlsManagerSettings
   res <- runClientM queryFunc (mkClientEnv manager (BaseUrl Https "api-v3.mbta.com" 443 ""))
