@@ -1,6 +1,8 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module TAPI where
 
@@ -10,12 +12,21 @@ import Data.Text
 import Data.Time (UTCTime)
 import Servant.API
 
-type VehicleAPI = Capture "APIKey" Text :> "vehicles" :> QueryParam "filter[route]" RouteID :> Get '[JSON] [Vehicles]
+type VehicleAPI = Capture "APIKey" Text :> "vehicles" :> QueryParam "filter[route]" RouteID :> Get '[JSON] [APIResponse]
 
 type RouteID = Text
 
-data Vehicles = Vehicles {
-  foo :: String
+data APIResponse = APIResponse {
+  payload :: [Vehicle]
 } deriving Generic
 
-instance FromJSON Vehicles
+data Vehicle = Vehicle {
+  id :: String
+} deriving Generic
+
+instance FromJSON APIResponse where
+  parseJSON = withObject "apiresponse" $ \o -> do
+    payload <- o .: "data"
+    return APIResponse{..}
+
+instance FromJSON Vehicle
