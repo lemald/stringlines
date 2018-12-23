@@ -28,6 +28,7 @@ dependencies:
 - aeson
 - http-client
 - http-client-tls
+- http-media
 
 library:
   source-dirs: src
