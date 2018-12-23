@@ -10,6 +10,7 @@ module TAPI where
 
 import Data.Aeson
 import Data.Text
+import Data.Time (UTCTime)
 import GHC.Generics
 import Network.HTTP.Media ((//), (/:))
 import Servant.API
@@ -42,7 +43,15 @@ data Vehicle = Vehicle {
 } deriving (Generic, Show)
 
 data VehicleAttributes = VehicleAttributes {
-  current_status :: Text
+  current_status :: Text,
+  current_stop_sequence :: Int,
+  speed :: Double,
+  direction_id :: Int,
+  bearing :: Int,
+  label :: Text,
+  longitude :: Double,
+  latitude :: Double,
+  updated_at :: UTCTime
 } deriving (Generic, Show)
 
 -- This is necessary due to "data" being a keyword in Haskell
