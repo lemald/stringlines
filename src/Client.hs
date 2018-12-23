@@ -5,7 +5,7 @@ module Client where
 import TAPI
 import Data.Proxy
 import Data.Text
-import Network.HTTP.Client (newManager, defaultManagerSettings)
+import Network.HTTP.Client (newManager)
 import Network.HTTP.Client.TLS
 import Servant.Client
 import Servant.API
