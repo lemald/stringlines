@@ -37,6 +37,8 @@ type TAPI = "vehicles"
             :> Get '[TJSON] (APIResponse (Entity Shape))
 
 type RouteID = Text
+type VehicleID = Text
+type TripID = Text
 
 data APIResponse a = APIResponse {
   payload :: [a]
@@ -44,7 +46,22 @@ data APIResponse a = APIResponse {
 
 data Entity a = Entity {
   id :: Text,
-  attributes :: a
+  attributes :: a,
+  relationships :: Relationships
+} deriving (Generic, Show)
+
+data Relationships = Relationships {
+  route :: Maybe (Relationship RouteID),
+  vehicle :: Maybe (Relationship VehicleID),
+  trip :: Maybe (Relationship TripID)
+} deriving (Generic, Show)
+
+data Relationship a = Relationship {
+  payload :: RelationshipPayload a
+} deriving (Generic, Show)
+
+data RelationshipPayload a = RelationshipPayload {
+  id :: a
 } deriving (Generic, Show)
 
 data Vehicle = Vehicle {
@@ -70,5 +87,11 @@ instance FromJSON a => FromJSON (APIResponse a) where
     payload <- o .: "data"
     return APIResponse{..}
 instance FromJSON a => FromJSON (Entity a)
+instance FromJSON Relationships
+instance FromJSON a => FromJSON (RelationshipPayload a)
+instance FromJSON a => FromJSON (Relationship a) where
+  parseJSON = withObject "relationship" $ \o -> do
+    payload <- o .: "data"
+    return Relationship{..}
 instance FromJSON Vehicle
 instance FromJSON Shape
