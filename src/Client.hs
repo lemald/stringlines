@@ -15,17 +15,17 @@ api = Proxy
 
 vehicles :: Maybe Text         -- API key
          -> Maybe TAPI.RouteID -- Route ID
-         -> ClientM VehicleResponse
+         -> ClientM (APIResponse Vehicle)
 
 vehicles = client api
 
 apiKey :: Text
 apiKey = "***REMOVED***"
 
-getVehicles :: TAPI.RouteID -> ClientM (VehicleResponse)
+getVehicles :: TAPI.RouteID -> ClientM (APIResponse Vehicle)
 getVehicles route = vehicles (Just apiKey) (Just route)
 
-queryAPI :: ClientM (VehicleResponse) -> IO (Either ServantError VehicleResponse)
+queryAPI :: ClientM (APIResponse a) -> IO (Either ServantError (APIResponse a))
 queryAPI queryFunc = do
   manager <- newManager tlsManagerSettings
   res <- runClientM queryFunc (mkClientEnv manager (BaseUrl Https "api-v3.mbta.com" 443 ""))

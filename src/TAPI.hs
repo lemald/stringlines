@@ -29,12 +29,12 @@ instance Accept TJSON where
 type VehicleAPI = "vehicles"
                   :> QueryParam "api-key" Text
                   :> QueryParam "filter[route]" RouteID
-                  :> Get '[TJSON] VehicleResponse
+                  :> Get '[TJSON] (APIResponse Vehicle)
 
 type RouteID = Text
 
-data VehicleResponse = VehicleResponse {
-  payload :: [Vehicle]
+data APIResponse a = APIResponse {
+  payload :: [a]
 } deriving (Generic, Show)
 
 data Vehicle = Vehicle {
@@ -47,7 +47,7 @@ data VehicleAttributes = VehicleAttributes {
   current_stop_sequence :: Int,
   speed :: Double,
   direction_id :: Int,
-  bearing :: Int,
+  bearing :: Maybe Int,
   label :: Text,
   longitude :: Double,
   latitude :: Double,
@@ -55,10 +55,10 @@ data VehicleAttributes = VehicleAttributes {
 } deriving (Generic, Show)
 
 -- This is necessary due to "data" being a keyword in Haskell
-instance FromJSON VehicleResponse where
+instance FromJSON a => FromJSON (APIResponse a) where
   parseJSON = withObject "apiresponse" $ \o -> do
     payload <- o .: "data"
-    return VehicleResponse{..}
+    return APIResponse{..}
 
 instance FromJSON Vehicle
 instance FromJSON VehicleAttributes
