@@ -3,6 +3,7 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 
@@ -26,10 +27,14 @@ instance Accept TJSON where
   contentType _ = "application" // "vnd.api+json"
                   /: ("charset", "utf-8")
 
-type VehicleAPI = "vehicles"
-                  :> QueryParam "api-key" Text
-                  :> QueryParam "filter[route]" RouteID
-                  :> Get '[TJSON] (APIResponse Vehicle)
+type TAPI = "vehicles"
+            :> QueryParam "api-key" Text
+            :> QueryParam "filter[route]" RouteID
+            :> Get '[TJSON] (APIResponse (Entity Vehicle))
+            :<|> "shapes"
+            :> QueryParam "api-key" Text
+            :> QueryParam "filter[route]" RouteID
+            :> Get '[TJSON] (APIResponse (Entity Shape))
 
 type RouteID = Text
 
@@ -37,12 +42,12 @@ data APIResponse a = APIResponse {
   payload :: [a]
 } deriving (Generic, Show)
 
-data Vehicle = Vehicle {
+data Entity a = Entity {
   id :: Text,
-  attributes :: VehicleAttributes
+  attributes :: a
 } deriving (Generic, Show)
 
-data VehicleAttributes = VehicleAttributes {
+data Vehicle = Vehicle {
   current_status :: Text,
   current_stop_sequence :: Int,
   speed :: Double,
@@ -54,11 +59,16 @@ data VehicleAttributes = VehicleAttributes {
   updated_at :: UTCTime
 } deriving (Generic, Show)
 
+data Shape = Shape {
+  polyline :: Text,
+  direction_id :: Int
+} deriving (Generic, Show)
+
 -- This is necessary due to "data" being a keyword in Haskell
 instance FromJSON a => FromJSON (APIResponse a) where
   parseJSON = withObject "apiresponse" $ \o -> do
     payload <- o .: "data"
     return APIResponse{..}
-
+instance FromJSON a => FromJSON (Entity a)
 instance FromJSON Vehicle
-instance FromJSON VehicleAttributes
+instance FromJSON Shape

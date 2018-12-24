@@ -10,20 +10,27 @@ import Network.HTTP.Client.TLS
 import Servant.Client
 import Servant.API
 
-api :: Proxy TAPI.VehicleAPI
+api :: Proxy TAPI
 api = Proxy
 
 vehicles :: Maybe Text         -- API key
          -> Maybe TAPI.RouteID -- Route ID
-         -> ClientM (APIResponse Vehicle)
+         -> ClientM (APIResponse (Entity Vehicle))
 
-vehicles = client api
+shapes :: Maybe Text         -- API key
+       -> Maybe TAPI.RouteID -- Route ID
+       -> ClientM (APIResponse (Entity Shape))
+
+vehicles :<|> shapes = client api
 
 apiKey :: Text
 apiKey = "***REMOVED***"
 
-getVehicles :: TAPI.RouteID -> ClientM (APIResponse Vehicle)
+getVehicles :: TAPI.RouteID -> ClientM (APIResponse (Entity Vehicle))
 getVehicles route = vehicles (Just apiKey) (Just route)
+
+getShapes :: TAPI.RouteID -> ClientM (APIResponse (Entity Shape))
+getShapes route = shapes (Just apiKey) (Just route)
 
 queryAPI :: ClientM (APIResponse a) -> IO (Either ServantError (APIResponse a))
 queryAPI queryFunc = do
