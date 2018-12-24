@@ -37,7 +37,8 @@ packages:
 # Dependency packages to be pulled from upstream that are not in the resolver
 # using the same syntax as the packages field.
 # (e.g., acme-missiles-0.3)
-# extra-deps: []
+extra-deps:
+- jord-0.5.0.0@sha256:0f0a8228f19e08d0f16284da915bbf1077f5f08403c1e7febd376c53a7695102
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

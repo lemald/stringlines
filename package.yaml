@@ -29,6 +29,8 @@ dependencies:
 - http-client
 - http-client-tls
 - http-media
+- gpolyline
+- jord
 
 library:
   source-dirs: src
