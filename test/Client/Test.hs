@@ -17,6 +17,8 @@ clientTests = testGroup "Client"
     tripInfoFromVehicle goodVehicleEntity @?= Just goodVehicleTripInfo
   ,testCase "tripInfoFromVehicle in bad case" $
     tripInfoFromVehicle badVehicleEntity @?= Nothing
+  ,testCase "tripInfoFromResponse" $
+    tripInfoFromResponse apiResponse @?= [goodVehicleTripInfo]
   ]
 
 time :: UTCTime
@@ -77,6 +79,11 @@ badVehicleEntity = Entity{
       ,trip = Nothing
       ,vehicle = Nothing
       }
+  }
+
+apiResponse :: APIResponse (Entity Vehicle)
+apiResponse = APIResponse{
+  payload = [goodVehicleEntity, badVehicleEntity]
   }
 
 goodVehicleTripInfo :: TripInfo
