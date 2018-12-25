@@ -8,6 +8,7 @@ import Control.Monad
 import Client
 import TAPI
 
+routes :: [RouteID]
 routes = ["77", "71", "73"]
 
 main :: IO ()

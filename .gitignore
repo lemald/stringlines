@@ -1,3 +1,4 @@
 .stack-work/
 bus-scrape.cabal
 *~
+.dir-locals.el
