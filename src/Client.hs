@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE DuplicateRecordFields #-}
 
 module Client where
 
@@ -48,3 +49,32 @@ data TripInfo = TripInfo {
   longitude :: Double,
   timestamp :: UTCTime
 } deriving Show
+
+tripInfoFromResponse :: APIResponse (Entity Vehicle) -> [Maybe TripInfo]
+tripInfoFromResponse APIResponse{ payload = vs } = Prelude.fmap tripInfoFromVehicle vs
+
+tripInfoFromVehicle :: Entity Vehicle -> Maybe TripInfo
+tripInfoFromVehicle Entity{
+  attributes = Vehicle{
+      latitude = lat
+      ,longitude = lon
+      ,updated_at = ts}
+  , relationships = Relationships{
+      route = Just Relationship{
+          payload = RelationshipPayload{
+              id = routeid
+              }
+          },
+      trip = Just Relationship{
+          payload = RelationshipPayload{
+              id = tripid
+              }
+          }
+      }
+  } = Just TripInfo{
+  tripid = tripid
+  ,routeid = routeid
+  ,latitude = lat
+  ,longitude = lon
+  ,timestamp = ts }
+tripInfoFromVehicle _ = Nothing
