@@ -39,6 +39,7 @@ type TAPI = "vehicles"
 type RouteID = Text
 type VehicleID = Text
 type TripID = Text
+type DirectionID = Int
 
 data APIResponse a = APIResponse {
   payload :: [a]
@@ -68,7 +69,7 @@ data Vehicle = Vehicle {
   current_status :: Text,
   current_stop_sequence :: Int,
   speed :: Double,
-  direction_id :: Int,
+  direction_id :: DirectionID,
   bearing :: Maybe Int,
   label :: Text,
   longitude :: Double,

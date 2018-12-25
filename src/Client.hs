@@ -43,8 +43,9 @@ queryAPI queryFunc = do
   return res
 
 data TripInfo = TripInfo {
-  tripid :: TripID,
-  routeid :: RouteID,
+  trip_id :: TripID,
+  route_id :: RouteID,
+  direction_id :: DirectionID,
   latitude :: Double,
   longitude :: Double,
   timestamp :: UTCTime
@@ -59,24 +60,26 @@ tripInfoFromResponse APIResponse{ payload = vs } =
 tripInfoFromVehicle :: Entity Vehicle -> Maybe TripInfo
 tripInfoFromVehicle Entity{
   attributes = Vehicle{
-      latitude = lat
+      direction_id = direction_id
+      ,latitude = lat
       ,longitude = lon
       ,updated_at = ts}
   ,relationships = Relationships{
       route = Just Relationship{
           payload = RelationshipPayload{
-              id = routeid
+              id = route_id
               }
           },
       trip = Just Relationship{
           payload = RelationshipPayload{
-              id = tripid
+              id = trip_id
               }
           }
       }
   } = Just TripInfo{
-  tripid = tripid
-  ,routeid = routeid
+  trip_id = trip_id
+  ,route_id = route_id
+  ,direction_id = direction_id
   ,latitude = lat
   ,longitude = lon
   ,timestamp = ts }
