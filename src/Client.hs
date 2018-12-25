@@ -51,7 +51,8 @@ data TripInfo = TripInfo {
 } deriving Show
 
 tripInfoFromResponse :: APIResponse (Entity Vehicle) -> [Maybe TripInfo]
-tripInfoFromResponse APIResponse{ payload = vs } = Prelude.fmap tripInfoFromVehicle vs
+tripInfoFromResponse APIResponse{ payload = vs } =
+  Prelude.fmap tripInfoFromVehicle vs
 
 tripInfoFromVehicle :: Entity Vehicle -> Maybe TripInfo
 tripInfoFromVehicle Entity{
@@ -59,7 +60,7 @@ tripInfoFromVehicle Entity{
       latitude = lat
       ,longitude = lon
       ,updated_at = ts}
-  , relationships = Relationships{
+  ,relationships = Relationships{
       route = Just Relationship{
           payload = RelationshipPayload{
               id = routeid
