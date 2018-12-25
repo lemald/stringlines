@@ -50,9 +50,11 @@ data TripInfo = TripInfo {
   timestamp :: UTCTime
 } deriving Show
 
-tripInfoFromResponse :: APIResponse (Entity Vehicle) -> [Maybe TripInfo]
+tripInfoFromResponse :: APIResponse (Entity Vehicle) -> [TripInfo]
 tripInfoFromResponse APIResponse{ payload = vs } =
-  Prelude.fmap tripInfoFromVehicle vs
+  (fmap tripInfoFromVehicle vs) >>= \ts -> case ts of
+                                             Nothing -> []
+                                             Just a -> [a]
 
 tripInfoFromVehicle :: Entity Vehicle -> Maybe TripInfo
 tripInfoFromVehicle Entity{

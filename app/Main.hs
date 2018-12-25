@@ -23,7 +23,10 @@ main = do
 routeLoop :: TAPI.RouteID -> IO()
 routeLoop r = do
   res <- queryAPI $ getVehicles r
-  putStrLn $ show res
+  let output = case res of
+        (Left _) -> "Error"
+        (Right apires) -> show $ tripInfoFromResponse apires
+    in putStrLn output
   threadDelay (15 * 1000 * 1000)
   routeLoop r
   
