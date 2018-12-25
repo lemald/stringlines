@@ -49,7 +49,7 @@ data TripInfo = TripInfo {
   latitude :: Double,
   longitude :: Double,
   timestamp :: UTCTime
-} deriving Show
+} deriving (Show, Eq)
 
 tripInfoFromResponse :: APIResponse (Entity Vehicle) -> [TripInfo]
 tripInfoFromResponse APIResponse{ payload = vs } =
@@ -63,7 +63,8 @@ tripInfoFromVehicle Entity{
       direction_id = direction_id
       ,latitude = lat
       ,longitude = lon
-      ,updated_at = ts}
+      ,updated_at = ts
+      }
   ,relationships = Relationships{
       route = Just Relationship{
           payload = RelationshipPayload{
@@ -82,5 +83,6 @@ tripInfoFromVehicle Entity{
   ,direction_id = direction_id
   ,latitude = lat
   ,longitude = lon
-  ,timestamp = ts }
+  ,timestamp = ts
+  }
 tripInfoFromVehicle _ = Nothing

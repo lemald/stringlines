@@ -1,2 +1,9 @@
+import Test.Tasty
+import Test.Tasty.HUnit
+
+import Client.Test
+
 main :: IO ()
-main = putStrLn "Test suite not yet implemented"
+main = defaultMain Client.Test.clientTests
+
+

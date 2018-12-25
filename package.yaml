@@ -56,3 +56,5 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - bus-scrape
+    - tasty
+    - tasty-hunit
