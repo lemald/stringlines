@@ -28,6 +28,6 @@ createTables :: Connection -> IO()
 createTables con =
   execute_ con "CREATE TABLE IF NOT EXISTS locations (trip_id STR, route_id STR, direction_id INTEGER, latitude REAL, longitude REAL, timestamp STR)"
 
-insertTripInfo :: Connection -> TripInfo -> IO()
-insertTripInfo con t =
-  execute con "INSERT INTO locations (trip_id, route_id, direction_id, latitude, longitude, timestamp) values (?,?,?,?,?,?)" t
+insertTripInfo :: Connection -> [TripInfo] -> IO()
+insertTripInfo con ts =
+  executeMany con "INSERT INTO locations (trip_id, route_id, direction_id, latitude, longitude, timestamp) values (?,?,?,?,?,?)" ts

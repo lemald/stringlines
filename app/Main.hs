@@ -34,7 +34,7 @@ routeLoop r con = do
     (Right apires) ->
       let tripInfo = tripInfoFromResponse apires
       in do putStrLn (show tripInfo)
-            mapM (\i -> insertTripInfo con i) tripInfo
+            insertTripInfo con tripInfo
             return ()
            
   threadDelay (15 * 1000 * 1000)
