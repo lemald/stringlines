@@ -5,7 +5,10 @@ module Main where
 import Control.Concurrent
 import Control.Concurrent.MVar
 import Control.Monad
+import Database.SQLite.Simple
+
 import Client
+import DataStore
 import TAPI
 
 routes :: [RouteID]
@@ -13,22 +16,28 @@ routes = ["77", "71", "73"]
 
 main :: IO ()
 main = do
+  con <- connectToDB
+  createTables con
   mvars <- mapM (\r -> do
                     mvar <- newEmptyMVar
-                    thread <- forkFinally (routeLoop r) (putMVar mvar)
+                    thread <- forkFinally (routeLoop r con) (putMVar mvar)
                     return mvar)
            routes
   mapM_ (\m -> takeMVar m) mvars
   return ()
 
-routeLoop :: TAPI.RouteID -> IO()
-routeLoop r = do
+routeLoop :: TAPI.RouteID -> Connection -> IO()
+routeLoop r con = do
   res <- queryAPI $ getVehicles r
-  let output = case res of
-        (Left _) -> "Error"
-        (Right apires) -> show $ tripInfoFromResponse apires
-    in putStrLn output
+  case res of
+    (Left _) -> putStrLn "Error"
+    (Right apires) ->
+      let tripInfo = tripInfoFromResponse apires
+      in do putStrLn (show tripInfo)
+            mapM (\i -> insertTripInfo con i) tripInfo
+            return ()
+           
   threadDelay (15 * 1000 * 1000)
-  routeLoop r
+  routeLoop r con
   
   
