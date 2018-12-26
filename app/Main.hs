@@ -24,6 +24,7 @@ main = do
                     return mvar)
            routes
   mapM_ (\m -> takeMVar m) mvars
+  closeDBCon con
   return ()
 
 routeLoop :: TAPI.RouteID -> Connection -> IO()
