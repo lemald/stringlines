@@ -43,7 +43,8 @@ routeLoop r con = do
                                          ++ ".")
                                insertTripInfo con tripInfo)
       case sql_res of
-        Left e -> putStrLn ("Exception raised: " ++ show (e :: Ex.SomeException))
+        Left e -> putStrLn ("Exception raised: "
+                            ++ show (e :: Ex.SomeException))
         Right _ -> return()
            
   threadDelay (15 * 1000 * 1000)
