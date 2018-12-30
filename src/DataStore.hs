@@ -28,8 +28,11 @@ closeDBCon :: Connection -> IO()
 closeDBCon con = close con
 
 createTables :: Connection -> IO()
-createTables con =
+createTables con = do
   execute_ con "CREATE TABLE IF NOT EXISTS location (trip_id STR, route_id STR, direction_id INTEGER, latitude REAL, longitude REAL, timestamp STR)"
+  execute_ con "CREATE INDEX IF NOT EXISTS location_trip_id ON location (trip_id)"
+  execute_ con "CREATE INDEX IF NOT EXISTS location_route_id ON location (route_id)"
+  execute_ con "CREATE INDEX IF NOT EXISTS location_timestamp ON location (DATETIME(timestamp))"
 
 insertTripInfo :: Connection -> [TripInfo] -> IO()
 insertTripInfo con ts =
