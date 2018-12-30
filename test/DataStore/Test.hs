@@ -22,7 +22,8 @@ dataStoreTests = withResource
 individualTests :: IO(Connection) -> TestTree
 individualTests con = testGroup "DataStore"
   [testCase "Creates table" $ con >>= testTableCreation
-  ,testCase "Inserts row" $ con >>= testRowInsert]
+  ,testCase "Inserts row" $ con >>= testRowInsert
+  ,testCase "Don't insert duplicate data points" $ con >>= testNoDups]
 
 testTableCreation :: Connection -> IO()
 testTableCreation con = do
@@ -39,10 +40,22 @@ testRowInsert con = do
   insertTripInfo con [tripInfo1]
   tripInfoEntries <- query_
     con
-    "SELECT count(*) FROM location"
-    :: IO([Only Int])
-  head tripInfoEntries @?= (Only 1)
-  -- tripInfoEntries !! 0 @?= tripInfo1
+    "SELECT CAST(trip_id AS TEXT), CAST(route_id AS TEXT), direction_id, latitude, longitude, timestamp FROM location"
+    :: IO([TripInfo])
+  length tripInfoEntries @?= 1
+  head tripInfoEntries @?= tripInfo1
+
+testNoDups :: Connection -> IO()
+testNoDups con = do
+  createTables con
+  insertTripInfo con [tripInfo1]
+  insertTripInfo con [tripInfo2]
+  tripInfoEntries <- query_
+    con
+    "SELECT CAST(trip_id AS TEXT), CAST(route_id AS TEXT), direction_id, latitude, longitude, timestamp FROM location"
+    :: IO([TripInfo])
+  length tripInfoEntries @?= 1
+  head tripInfoEntries @?= tripInfo1
 
 tripInfo1 :: TripInfo
 tripInfo1 = TripInfo{
