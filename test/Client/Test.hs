@@ -13,7 +13,9 @@ import TAPI
 
 clientTests :: TestTree
 clientTests = testGroup "Client"
-  [testCase "tripInfoFromVehicle in good case" $
+  [testCase "entitiesFromResponse" $
+    entitiesFromResponse apiResponse @?= [goodVehicleEntity, badVehicleEntity]
+  ,testCase "tripInfoFromVehicle in good case" $
     tripInfoFromVehicle goodVehicleEntity @?= Just goodVehicleTripInfo
   ,testCase "tripInfoFromVehicle in bad case" $
     tripInfoFromVehicle badVehicleEntity @?= Nothing
@@ -22,25 +24,25 @@ clientTests = testGroup "Client"
   ]
 
 time :: UTCTime
-time = UTCTime {
-  utctDay = (ModifiedJulianDay 1)
-  ,utctDayTime = 0
+time = read "2018-12-01 20:30:00"
+
+goodVehicle :: Vehicle
+goodVehicle = Vehicle{
+  current_status = "foo"
+  ,current_stop_sequence = 7
+  ,speed = 10.0
+  ,bearing = Just 17
+  ,label = "bar"
+  ,direction_id = 1
+  ,latitude = 2.0
+  ,longitude = 3.0
+  ,updated_at = time
   }
 
 goodVehicleEntity :: Entity Vehicle
 goodVehicleEntity = Entity{
   id = "1234"
-  ,attributes = Vehicle{
-      current_status = "foo"
-      ,current_stop_sequence = 7
-      ,speed = 10.0
-      ,bearing = Just 17
-      ,label = "bar"
-      ,direction_id = 1
-      ,latitude = 2.0
-      ,longitude = 3.0
-      ,updated_at = time
-      }
+  ,attributes = goodVehicle
   ,relationships = Relationships{
       route = Just Relationship{
           payload = RelationshipPayload{
@@ -56,20 +58,23 @@ goodVehicleEntity = Entity{
       }
   }
 
+badVehicle :: Vehicle
+badVehicle = Vehicle{
+  current_status = "foo"
+  ,current_stop_sequence = 7
+  ,speed = 10.0
+  ,bearing = Just 17
+  ,label = "bar"
+  ,direction_id = 1
+  ,latitude = 2.0
+  ,longitude = 3.0
+  ,updated_at = time
+  }
+
 badVehicleEntity :: Entity Vehicle
 badVehicleEntity = Entity{
   id = "1234"
-  ,attributes = Vehicle{
-      current_status = "foo"
-      ,current_stop_sequence = 7
-      ,speed = 10.0
-      ,bearing = Just 17
-      ,label = "bar"
-      ,direction_id = 1
-      ,latitude = 2.0
-      ,longitude = 3.0
-      ,updated_at = time
-      }
+  ,attributes = badVehicle
   ,relationships = Relationships{
       route = Just Relationship{
           payload = RelationshipPayload{

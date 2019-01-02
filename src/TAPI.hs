@@ -39,6 +39,7 @@ type TAPI = "vehicles"
 type RouteID = Text
 type VehicleID = Text
 type TripID = Text
+type ShapeID = Text
 type DirectionID = Int
 
 data APIResponse a = APIResponse {
@@ -49,21 +50,21 @@ data Entity a = Entity {
   id :: Text,
   attributes :: a,
   relationships :: Relationships
-} deriving (Generic, Show)
+} deriving (Generic, Eq, Show)
 
 data Relationships = Relationships {
   route :: Maybe (Relationship RouteID),
   vehicle :: Maybe (Relationship VehicleID),
   trip :: Maybe (Relationship TripID)
-} deriving (Generic, Show)
+} deriving (Generic, Eq, Show)
 
 data Relationship a = Relationship {
   payload :: RelationshipPayload a
-} deriving (Generic, Show)
+} deriving (Generic, Eq, Show)
 
 data RelationshipPayload a = RelationshipPayload {
   id :: a
-} deriving (Generic, Show)
+} deriving (Generic, Eq, Show)
 
 data Vehicle = Vehicle {
   current_status :: Text,
@@ -75,10 +76,11 @@ data Vehicle = Vehicle {
   longitude :: Double,
   latitude :: Double,
   updated_at :: UTCTime
-} deriving (Generic, Show)
+} deriving (Generic, Eq, Show)
 
 data Shape = Shape {
   polyline :: Text,
+  name :: Text,
   direction_id :: Int
 } deriving (Generic, Show)
 

@@ -51,11 +51,15 @@ data TripInfo = TripInfo {
   timestamp :: UTCTime
 } deriving (Show, Eq)
 
+entitiesFromResponse :: APIResponse (Entity a) -> [Entity a]
+entitiesFromResponse APIResponse{ payload = es } = es
+
 tripInfoFromResponse :: APIResponse (Entity Vehicle) -> [TripInfo]
-tripInfoFromResponse APIResponse{ payload = vs } =
-  (fmap tripInfoFromVehicle vs) >>= \ts -> case ts of
-                                             Nothing -> []
-                                             Just a -> [a]
+tripInfoFromResponse res = do
+  ts <- (fmap tripInfoFromVehicle $ entitiesFromResponse res)
+  case ts of
+    Nothing -> []
+    Just a -> [a]
 
 tripInfoFromVehicle :: Entity Vehicle -> Maybe TripInfo
 tripInfoFromVehicle Entity{

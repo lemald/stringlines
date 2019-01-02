@@ -21,13 +21,20 @@ main = do
   createTables con
   mvars <- mapM (\r -> do
                     mvar <- newEmptyMVar
-                    thread <- forkFinally (routeLoop r con) (putMVar mvar)
+                    thread <- forkFinally
+                      (initiateRouteLoop r con)
+                      (putMVar mvar)
                     return mvar)
            routes
   mapM_ (\m -> takeMVar m) mvars
   putStrLn "All child threads exited, shutting down."
   closeDBCon con
   return ()
+
+initiateRouteLoop :: TAPI.RouteID -> Connection -> IO()
+initiateRouteLoop r con = do
+  shapeResponse <- queryAPI $ getShapes r
+  routeLoop r con
 
 routeLoop :: TAPI.RouteID -> Connection -> IO()
 routeLoop r con = do
