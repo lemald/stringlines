@@ -11,11 +11,11 @@ import GPolyline
 
 progressOnRoute :: Vehicle -> Shape -> Maybe Double
 progressOnRoute vehicle shape = let
-  vehicle_pos = (decimalLatLong
+  vehiclePos = (decimalLatLong
                  (TAPI.latitude vehicle)
                  (TAPI.longitude vehicle))
   points = shapeToPoints shape
-  closestPoint = closestPointAlongRoute vehicle_pos points
+  closestPoint = closestPointAlongRoute vehiclePos points
   in case closestPoint of
        Nothing -> Nothing
        Just p -> let
@@ -30,13 +30,13 @@ progressOnRoute' :: LatLong ->
                     (Length, Length, Maybe LatLong, Bool) ->
                     LatLong ->
                     (Length, Length, Maybe LatLong, Bool)
-progressOnRoute' _ (_, _, Nothing, _) p =
-  (metres 0.0, metres 0.0, Just p, False)
+progressOnRoute' cp (_, _, Nothing, _) p =
+  (metres 0.0, metres 0.0, Just p, cp == p)
 progressOnRoute' cp (vehicleDist, totalDist, Just p1, pointSeen) p2 =
   let dist = surfaceDistance84 p1 p2
       vehicleDist' = if pointSeen
-                     then vehicleDist `add` dist
-                     else vehicleDist
+                     then vehicleDist
+                     else vehicleDist `add` dist
       totalDist' = totalDist `add` dist
       pointSeen' = pointSeen || (p2 == cp)
   in (vehicleDist', totalDist', Just p2, pointSeen')
