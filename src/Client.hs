@@ -61,15 +61,17 @@ attributesByID (Entity{ id = entityID, attributes = attr }:es) id =
   if entityID == id then Just attr
   else attributesByID es id
 
-tripInfoFromResponse :: APIResponse (Entity Vehicle) -> [TripInfo]
-tripInfoFromResponse res = do
-  ts <- (fmap tripInfoFromVehicle $ entitiesFromResponse res)
+tripInfoFromResponse :: APIResponse (Entity Vehicle) ->
+                        Maybe Shape ->
+                        [TripInfo]
+tripInfoFromResponse res s = do
+  ts <- (fmap (tripInfoFromVehicle s) $ entitiesFromResponse res)
   case ts of
     Nothing -> []
     Just a -> [a]
 
-tripInfoFromVehicle :: Entity Vehicle -> Maybe TripInfo
-tripInfoFromVehicle Entity{
+tripInfoFromVehicle :: Maybe Shape -> Entity Vehicle -> Maybe TripInfo
+tripInfoFromVehicle s Entity{
   attributes = Vehicle{
       direction_id = direction_id
       ,latitude = lat
@@ -97,4 +99,4 @@ tripInfoFromVehicle Entity{
   ,progress = Nothing
   ,timestamp = ts
   }
-tripInfoFromVehicle _ = Nothing
+tripInfoFromVehicle _ _ = Nothing

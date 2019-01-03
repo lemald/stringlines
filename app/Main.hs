@@ -49,16 +49,17 @@ initiateRouteLoop rc con = do
   case shapeResponse of
     (Left err) -> putStrLn("Error fetching shape data from API: "
                            ++ show err)
-    (Right apires) -> routeLoop rc con
+    (Right apires) -> let shapeEntities = entitiesFromResponse apires
+                      in routeLoop rc shapeEntities con
 
-routeLoop :: RouteConf -> Connection -> IO()
-routeLoop rc con = do
+routeLoop :: RouteConf -> [Entity Shape] -> Connection -> IO()
+routeLoop rc shapeEntities con = do
   res <- queryAPI $ getVehicles (routeConfRoute rc)
   case res of
     (Left err) -> putStrLn ("Error fetching vehicle data from API: "
                             ++ show err)
     (Right apires) -> do
-      sql_res <- Ex.try (let tripInfo = tripInfoFromResponse apires
+      sql_res <- Ex.try (let tripInfo = tripInfoFromResponse apires Nothing
                          in do putStrLn ("Fetched "
                                          ++ show (length tripInfo)
                                          ++ " locations for route "
@@ -71,6 +72,6 @@ routeLoop rc con = do
         Right _ -> return()
            
   threadDelay (15 * 1000 * 1000)
-  routeLoop rc con
+  routeLoop rc shapeEntities con
   
   
