@@ -4,17 +4,42 @@ import TAPI
 import Data.Geo.Jord.Geodetics
 import Data.Geo.Jord.LatLong
 import Data.Geo.Jord.Length
+import Data.Geo.Jord.Quantity
 import Data.List
 import Data.Text as T
 import GPolyline
 
-progressOnRoute :: Vehicle -> Shape -> Double
+progressOnRoute :: Vehicle -> Shape -> Maybe Double
 progressOnRoute vehicle shape = let
   vehicle_pos = (decimalLatLong
                  (TAPI.latitude vehicle)
                  (TAPI.longitude vehicle))
   points = shapeToPoints shape
-  in 1.0 -- dummy double to make it typecheck while WIP
+  closestPoint = closestPointAlongRoute vehicle_pos points
+  in case closestPoint of
+       Nothing -> Nothing
+       Just p -> let
+         (covered, total, _, _) =
+           Data.List.foldl'
+           (progressOnRoute' p)
+           (metres 0.0, metres 0.0, Nothing, False)
+           points
+         in Just (toMetres covered / toMetres total)
+
+progressOnRoute' :: LatLong ->
+                    (Length, Length, Maybe LatLong, Bool) ->
+                    LatLong ->
+                    (Length, Length, Maybe LatLong, Bool)
+progressOnRoute' cp (_, _, Nothing, _) p =
+  (metres 0.0, metres 0.0, Just p, False)
+progressOnRoute' cp (vehicleDist, totalDist, Just p1, pointSeen) p2 =
+  let dist = surfaceDistance84 p1 p2
+      vehicleDist' = if pointSeen
+                     then vehicleDist `add` dist
+                     else vehicleDist
+      totalDist' = totalDist `add` dist
+      pointSeen' = pointSeen || (p2 == cp)
+  in (vehicleDist', totalDist', Just p2, pointSeen')
 
 shapeToPoints :: Shape -> [LatLong]
 shapeToPoints s = let
