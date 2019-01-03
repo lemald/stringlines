@@ -7,13 +7,26 @@ import Control.Concurrent.MVar
 import qualified Control.Exception as Ex
 import Control.Monad
 import Database.SQLite.Simple
+import qualified Data.Map.Strict as Map
 
 import Client
 import DataStore
 import TAPI
 
-routes :: [RouteID]
-routes = ["77", "71", "73"]
+data RouteConf = RouteConf RouteID (Map.Map Int ShapeID)
+
+routeConfRoute :: RouteConf -> RouteID
+routeConfRoute (RouteConf r _) = r
+
+routeConfShapeMap :: RouteConf -> Map.Map Int ShapeID
+routeConfShapeMap (RouteConf _ m) = m
+
+routes :: [RouteConf]
+routes = [
+  RouteConf "77" $ Map.fromList [(0, "770105"), (1, "770107")]
+  ,RouteConf "71" Map.empty
+  ,RouteConf "73" Map.empty
+  ]
 
 main :: IO ()
 main = do
@@ -29,19 +42,18 @@ main = do
   mapM_ (\m -> takeMVar m) mvars
   putStrLn "All child threads exited, shutting down."
   closeDBCon con
-  return ()
 
-initiateRouteLoop :: TAPI.RouteID -> Connection -> IO()
-initiateRouteLoop r con = do
-  shapeResponse <- queryAPI $ getShapes r
+initiateRouteLoop :: RouteConf -> Connection -> IO()
+initiateRouteLoop rc con = do
+  shapeResponse <- queryAPI $ getShapes (routeConfRoute rc)
   case shapeResponse of
     (Left err) -> putStrLn("Error fetching shape data from API: "
                            ++ show err)
-    (Right apires) -> routeLoop r con
+    (Right apires) -> routeLoop rc con
 
-routeLoop :: TAPI.RouteID -> Connection -> IO()
-routeLoop r con = do
-  res <- queryAPI $ getVehicles r
+routeLoop :: RouteConf -> Connection -> IO()
+routeLoop rc con = do
+  res <- queryAPI $ getVehicles (routeConfRoute rc)
   case res of
     (Left err) -> putStrLn ("Error fetching vehicle data from API: "
                             ++ show err)
@@ -50,7 +62,7 @@ routeLoop r con = do
                          in do putStrLn ("Fetched "
                                          ++ show (length tripInfo)
                                          ++ " locations for route "
-                                         ++ show r
+                                         ++ show (routeConfRoute rc)
                                          ++ ".")
                                insertTripInfo con tripInfo)
       case sql_res of
@@ -59,6 +71,6 @@ routeLoop r con = do
         Right _ -> return()
            
   threadDelay (15 * 1000 * 1000)
-  routeLoop r con
+  routeLoop rc con
   
   
