@@ -30,7 +30,7 @@ progressOnRoute' :: LatLong ->
                     (Length, Length, Maybe LatLong, Bool) ->
                     LatLong ->
                     (Length, Length, Maybe LatLong, Bool)
-progressOnRoute' cp (_, _, Nothing, _) p =
+progressOnRoute' _ (_, _, Nothing, _) p =
   (metres 0.0, metres 0.0, Just p, False)
 progressOnRoute' cp (vehicleDist, totalDist, Just p1, pointSeen) p2 =
   let dist = surfaceDistance84 p1 p2

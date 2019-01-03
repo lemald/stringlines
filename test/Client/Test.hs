@@ -98,6 +98,7 @@ goodVehicleTripInfo = TripInfo{
   ,direction_id = 1
   ,latitude = 2.0
   ,longitude = 3.0
+  ,progress = Nothing
   ,timestamp = time
   }
 

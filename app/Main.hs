@@ -34,13 +34,17 @@ main = do
 initiateRouteLoop :: TAPI.RouteID -> Connection -> IO()
 initiateRouteLoop r con = do
   shapeResponse <- queryAPI $ getShapes r
-  routeLoop r con
+  case shapeResponse of
+    (Left err) -> putStrLn("Error fetching shape data from API: "
+                           ++ show err)
+    (Right apires) -> routeLoop r con
 
 routeLoop :: TAPI.RouteID -> Connection -> IO()
 routeLoop r con = do
   res <- queryAPI $ getVehicles r
   case res of
-    (Left err) -> putStrLn ("Error fetching data from API: " ++ show err)
+    (Left err) -> putStrLn ("Error fetching vehicle data from API: "
+                            ++ show err)
     (Right apires) -> do
       sql_res <- Ex.try (let tripInfo = tripInfoFromResponse apires
                          in do putStrLn ("Fetched "

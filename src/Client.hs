@@ -48,6 +48,7 @@ data TripInfo = TripInfo {
   direction_id :: DirectionID,
   latitude :: Double,
   longitude :: Double,
+  progress :: Maybe Double,
   timestamp :: UTCTime
 } deriving (Show, Eq)
 
@@ -87,6 +88,7 @@ tripInfoFromVehicle Entity{
   ,direction_id = direction_id
   ,latitude = lat
   ,longitude = lon
+  ,progress = Nothing
   ,timestamp = ts
   }
 tripInfoFromVehicle _ = Nothing
