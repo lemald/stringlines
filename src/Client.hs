@@ -55,6 +55,12 @@ data TripInfo = TripInfo {
 entitiesFromResponse :: APIResponse (Entity a) -> [Entity a]
 entitiesFromResponse APIResponse{ payload = es } = es
 
+attributesByID :: [Entity a] -> Text -> Maybe a
+attributesByID [] _ = Nothing
+attributesByID (Entity{ id = entityID, attributes = attr }:es) id =
+  if entityID == id then Just attr
+  else attributesByID es id
+
 tripInfoFromResponse :: APIResponse (Entity Vehicle) -> [TripInfo]
 tripInfoFromResponse res = do
   ts <- (fmap tripInfoFromVehicle $ entitiesFromResponse res)
