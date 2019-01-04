@@ -32,7 +32,6 @@ dependencies:
 - gpolyline
 - jord
 - sqlite-simple
-- containers
 
 library:
   source-dirs: src
