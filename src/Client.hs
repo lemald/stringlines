@@ -3,7 +3,6 @@
 
 module Client where
 
-import TAPI
 import Data.Proxy
 import Data.Text
 import Data.Time (UTCTime)
@@ -11,6 +10,9 @@ import Network.HTTP.Client (newManager)
 import Network.HTTP.Client.TLS
 import Servant.Client
 import Servant.API
+
+import TAPI
+import Progress
 
 api :: Proxy TAPI
 api = Proxy
@@ -48,21 +50,30 @@ data TripInfo = TripInfo {
   direction_id :: DirectionID,
   latitude :: Double,
   longitude :: Double,
+  progress :: Maybe Double,
   timestamp :: UTCTime
 } deriving (Show, Eq)
 
 entitiesFromResponse :: APIResponse (Entity a) -> [Entity a]
 entitiesFromResponse APIResponse{ payload = es } = es
 
-tripInfoFromResponse :: APIResponse (Entity Vehicle) -> [TripInfo]
-tripInfoFromResponse res = do
-  ts <- (fmap tripInfoFromVehicle $ entitiesFromResponse res)
+attributesByID :: [Entity a] -> Text -> Maybe a
+attributesByID [] _ = Nothing
+attributesByID (Entity{ id = entityID, attributes = attr }:es) id =
+  if entityID == id then Just attr
+  else attributesByID es id
+
+tripInfoFromResponse :: APIResponse (Entity Vehicle) ->
+                        Maybe Shape ->
+                        [TripInfo]
+tripInfoFromResponse res s = do
+  ts <- (fmap (tripInfoFromVehicle s) $ entitiesFromResponse res)
   case ts of
     Nothing -> []
     Just a -> [a]
 
-tripInfoFromVehicle :: Entity Vehicle -> Maybe TripInfo
-tripInfoFromVehicle Entity{
+tripInfoFromVehicle :: Maybe Shape -> Entity Vehicle -> Maybe TripInfo
+tripInfoFromVehicle s Entity{
   attributes = Vehicle{
       direction_id = direction_id
       ,latitude = lat
@@ -87,6 +98,9 @@ tripInfoFromVehicle Entity{
   ,direction_id = direction_id
   ,latitude = lat
   ,longitude = lon
+  ,progress = case s of
+      Just shape -> progressOnRoute lat lon shape
+      Nothing -> Nothing
   ,timestamp = ts
   }
-tripInfoFromVehicle _ = Nothing
+tripInfoFromVehicle _ _ = Nothing

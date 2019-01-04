@@ -16,11 +16,11 @@ clientTests = testGroup "Client"
   [testCase "entitiesFromResponse" $
     entitiesFromResponse apiResponse @?= [goodVehicleEntity, badVehicleEntity]
   ,testCase "tripInfoFromVehicle in good case" $
-    tripInfoFromVehicle goodVehicleEntity @?= Just goodVehicleTripInfo
+    tripInfoFromVehicle Nothing goodVehicleEntity @?= Just goodVehicleTripInfo
   ,testCase "tripInfoFromVehicle in bad case" $
-    tripInfoFromVehicle badVehicleEntity @?= Nothing
+    tripInfoFromVehicle Nothing badVehicleEntity @?= Nothing
   ,testCase "tripInfoFromResponse" $
-    tripInfoFromResponse apiResponse @?= [goodVehicleTripInfo]
+    tripInfoFromResponse apiResponse Nothing @?= [goodVehicleTripInfo]
   ]
 
 time :: UTCTime
@@ -98,6 +98,7 @@ goodVehicleTripInfo = TripInfo{
   ,direction_id = 1
   ,latitude = 2.0
   ,longitude = 3.0
+  ,progress = Nothing
   ,timestamp = time
   }
 

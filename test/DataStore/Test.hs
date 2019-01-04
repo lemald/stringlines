@@ -40,7 +40,7 @@ testRowInsert con = do
   insertTripInfo con [tripInfo1]
   tripInfoEntries <- query_
     con
-    "SELECT CAST(trip_id AS TEXT), CAST(route_id AS TEXT), direction_id, latitude, longitude, timestamp FROM location"
+    "SELECT CAST(trip_id AS TEXT), CAST(route_id AS TEXT), direction_id, latitude, longitude, progress, timestamp FROM location"
     :: IO([TripInfo])
   length tripInfoEntries @?= 1
   head tripInfoEntries @?= tripInfo1
@@ -52,7 +52,7 @@ testNoDups con = do
   insertTripInfo con [tripInfo2]
   tripInfoEntries <- query_
     con
-    "SELECT CAST(trip_id AS TEXT), CAST(route_id AS TEXT), direction_id, latitude, longitude, timestamp FROM location"
+    "SELECT CAST(trip_id AS TEXT), CAST(route_id AS TEXT), direction_id, latitude, longitude, progress, timestamp FROM location"
     :: IO([TripInfo])
   length tripInfoEntries @?= 1
   head tripInfoEntries @?= tripInfo1
@@ -64,6 +64,7 @@ tripInfo1 = TripInfo{
   direction_id = 0,
   latitude = 1.0,
   longitude = 2.0,
+  progress = Just 0.5,
   timestamp = read "2018-12-01 20:30:00" :: UTCTime
   }
 
@@ -74,5 +75,6 @@ tripInfo2 = TripInfo{
   direction_id = 0,
   latitude = 3.0,
   longitude = 4.0,
+  progress = Just 0.5,
   timestamp = read "2018-12-01 20:30:00" :: UTCTime
   }

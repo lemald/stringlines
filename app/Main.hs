@@ -12,8 +12,18 @@ import Client
 import DataStore
 import TAPI
 
-routes :: [RouteID]
-routes = ["77", "71", "73"]
+data RouteConf = RouteConf RouteID ShapeID
+
+routeConfRoute :: RouteConf -> RouteID
+routeConfRoute (RouteConf r _) = r
+
+routeConfShapeID :: RouteConf -> ShapeID
+routeConfShapeID (RouteConf _ s) = s
+
+routes :: [RouteConf]
+routes = [
+  RouteConf "77" "770105"
+  ]
 
 main :: IO ()
 main = do
@@ -29,24 +39,30 @@ main = do
   mapM_ (\m -> takeMVar m) mvars
   putStrLn "All child threads exited, shutting down."
   closeDBCon con
-  return ()
 
-initiateRouteLoop :: TAPI.RouteID -> Connection -> IO()
-initiateRouteLoop r con = do
-  shapeResponse <- queryAPI $ getShapes r
-  routeLoop r con
+initiateRouteLoop :: RouteConf -> Connection -> IO()
+initiateRouteLoop rc con = do
+  shapeResponse <- queryAPI $ getShapes (routeConfRoute rc)
+  case shapeResponse of
+    (Left err) -> putStrLn("Error fetching shape data from API: "
+                           ++ show err)
+    (Right apires) -> let shapeEntities = entitiesFromResponse apires
+                      in routeLoop rc shapeEntities con
 
-routeLoop :: TAPI.RouteID -> Connection -> IO()
-routeLoop r con = do
-  res <- queryAPI $ getVehicles r
+routeLoop :: RouteConf -> [Entity Shape] -> Connection -> IO()
+routeLoop rc shapeEntities con = do
+  res <- queryAPI $ getVehicles (routeConfRoute rc)
   case res of
-    (Left err) -> putStrLn ("Error fetching data from API: " ++ show err)
+    (Left err) -> putStrLn ("Error fetching vehicle data from API: "
+                            ++ show err)
     (Right apires) -> do
-      sql_res <- Ex.try (let tripInfo = tripInfoFromResponse apires
+      sql_res <- Ex.try (let s = attributesByID shapeEntities
+                                 $ routeConfShapeID rc
+                             tripInfo = tripInfoFromResponse apires s
                          in do putStrLn ("Fetched "
                                          ++ show (length tripInfo)
                                          ++ " locations for route "
-                                         ++ show r
+                                         ++ show (routeConfRoute rc)
                                          ++ ".")
                                insertTripInfo con tripInfo)
       case sql_res of
@@ -55,6 +71,6 @@ routeLoop r con = do
         Right _ -> return()
            
   threadDelay (15 * 1000 * 1000)
-  routeLoop r con
+  routeLoop rc shapeEntities con
   
   

@@ -16,6 +16,16 @@ progressTests = testGroup "Progress" $
     closestPointAlongRoute farAwayPoint (shapeToPoints shape) @?= Nothing
   ,testCase "closestPointAlongRoute for a point close to the route" $
     closestPointAlongRoute closePoint (shapeToPoints shape) @?= Just pointAlongRoute
+  ,testCase "progressOnRoute for vehicle at the end of the route" $
+    progressOnRoute
+    (fst coordsNearArlingtonHts)
+    (snd coordsNearArlingtonHts)
+    shape @?= Just 1.0
+  ,testCase "progressOnRoute for vehicle at the beginning of the route" $
+    progressOnRoute
+    (fst coordsNearHarvard)
+    (snd coordsNearHarvard)
+    shape @?= Just 0.0
   ]
 
 shape :: Shape
@@ -33,3 +43,9 @@ closePoint = decimalLatLong 42.403261 (-71.138979)
 
 pointAlongRoute :: LatLong
 pointAlongRoute = decimalLatLong 42.40324 (-71.13908)
+
+coordsNearArlingtonHts :: (Double, Double)
+coordsNearArlingtonHts = (42.424736, (-71.185059))
+
+coordsNearHarvard :: (Double, Double)
+coordsNearHarvard = (42.374074, (-71.118839))
