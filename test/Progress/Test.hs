@@ -17,9 +17,15 @@ progressTests = testGroup "Progress" $
   ,testCase "closestPointAlongRoute for a point close to the route" $
     closestPointAlongRoute closePoint (shapeToPoints shape) @?= Just pointAlongRoute
   ,testCase "progressOnRoute for vehicle at the end of the route" $
-    progressOnRoute busAtArlingtonHts shape @?= Just 1.0
+    progressOnRoute
+    (fst coordsNearArlingtonHts)
+    (snd coordsNearArlingtonHts)
+    shape @?= Just 1.0
   ,testCase "progressOnRoute for vehicle at the beginning of the route" $
-    progressOnRoute busAtHarvard shape @?= Just 0.0
+    progressOnRoute
+    (fst coordsNearHarvard)
+    (snd coordsNearHarvard)
+    shape @?= Just 0.0
   ]
 
 shape :: Shape
@@ -38,28 +44,8 @@ closePoint = decimalLatLong 42.403261 (-71.138979)
 pointAlongRoute :: LatLong
 pointAlongRoute = decimalLatLong 42.40324 (-71.13908)
 
-busAtArlingtonHts :: Vehicle
-busAtArlingtonHts = Vehicle{
-  current_status = "foo"
-  ,current_stop_sequence = 10
-  ,speed = 0.0
-  ,direction_id = 0
-  ,bearing = Just 180
-  ,label = "Arlington Heights"
-  ,latitude = 42.424736
-  ,longitude = (-71.185059)
-  ,updated_at = read "2019-01-01 12:00:00"
-  }
+coordsNearArlingtonHts :: (Double, Double)
+coordsNearArlingtonHts = (42.424736, (-71.185059))
 
-busAtHarvard :: Vehicle
-busAtHarvard = Vehicle{
-  current_status = "foo"
-  ,current_stop_sequence = 10
-  ,speed = 0.0
-  ,direction_id = 0
-  ,bearing = Just 180
-  ,label = "Arlington Heights"
-  ,latitude = 42.374074
-  ,longitude = (-71.118839)
-  ,updated_at = read "2019-01-01 12:00:00"
-  }
+coordsNearHarvard :: (Double, Double)
+coordsNearHarvard = (42.374074, (-71.118839))

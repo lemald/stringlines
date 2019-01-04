@@ -9,11 +9,9 @@ import Data.List
 import Data.Text as T
 import GPolyline
 
-progressOnRoute :: Vehicle -> Shape -> Maybe Double
-progressOnRoute vehicle shape = let
-  vehiclePos = (decimalLatLong
-                 (TAPI.latitude vehicle)
-                 (TAPI.longitude vehicle))
+progressOnRoute :: Double -> Double -> Shape -> Maybe Double
+progressOnRoute vehicleLat vehicleLong shape = let
+  vehiclePos = decimalLatLong vehicleLat vehicleLong
   points = shapeToPoints shape
   closestPoint = closestPointAlongRoute vehiclePos points
   in case closestPoint of

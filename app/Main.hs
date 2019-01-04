@@ -7,25 +7,22 @@ import Control.Concurrent.MVar
 import qualified Control.Exception as Ex
 import Control.Monad
 import Database.SQLite.Simple
-import qualified Data.Map.Strict as Map
 
 import Client
 import DataStore
 import TAPI
 
-data RouteConf = RouteConf RouteID (Map.Map Int ShapeID)
+data RouteConf = RouteConf RouteID ShapeID
 
 routeConfRoute :: RouteConf -> RouteID
 routeConfRoute (RouteConf r _) = r
 
-routeConfShapeMap :: RouteConf -> Map.Map Int ShapeID
-routeConfShapeMap (RouteConf _ m) = m
+routeConfShapeID :: RouteConf -> ShapeID
+routeConfShapeID (RouteConf _ s) = s
 
 routes :: [RouteConf]
 routes = [
-  RouteConf "77" $ Map.fromList [(0, "770105"), (1, "770107")]
-  ,RouteConf "71" Map.empty
-  ,RouteConf "73" Map.empty
+  RouteConf "77" "770105"
   ]
 
 main :: IO ()
@@ -59,7 +56,9 @@ routeLoop rc shapeEntities con = do
     (Left err) -> putStrLn ("Error fetching vehicle data from API: "
                             ++ show err)
     (Right apires) -> do
-      sql_res <- Ex.try (let tripInfo = tripInfoFromResponse apires Nothing
+      sql_res <- Ex.try (let s = attributesByID shapeEntities
+                                 $ routeConfShapeID rc
+                             tripInfo = tripInfoFromResponse apires s
                          in do putStrLn ("Fetched "
                                          ++ show (length tripInfo)
                                          ++ " locations for route "

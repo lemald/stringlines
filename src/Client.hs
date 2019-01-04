@@ -3,7 +3,6 @@
 
 module Client where
 
-import TAPI
 import Data.Proxy
 import Data.Text
 import Data.Time (UTCTime)
@@ -11,6 +10,9 @@ import Network.HTTP.Client (newManager)
 import Network.HTTP.Client.TLS
 import Servant.Client
 import Servant.API
+
+import TAPI
+import Progress
 
 api :: Proxy TAPI
 api = Proxy
@@ -96,7 +98,9 @@ tripInfoFromVehicle s Entity{
   ,direction_id = direction_id
   ,latitude = lat
   ,longitude = lon
-  ,progress = Nothing
+  ,progress = case s of
+      Just shape -> progressOnRoute lat lon shape
+      Nothing -> Nothing
   ,timestamp = ts
   }
 tripInfoFromVehicle _ _ = Nothing
