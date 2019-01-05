@@ -3,3 +3,4 @@ bus-scrape.cabal
 *~
 .dir-locals.el
 *.db
+*.png
