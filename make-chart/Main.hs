@@ -7,6 +7,7 @@ import qualified Data.Map.Strict as Map
 import Data.Time.Calendar
 import Data.Time.Clock
 import Data.Time.LocalTime
+import Graphics.Gnuplot.LineSpecification
 import Graphics.Gnuplot.Simple
 import Graphics.Gnuplot.Terminal.PNG
 import Graphics.Gnuplot.Time
@@ -20,23 +21,31 @@ main = do
   con <- connectToDB
   -- TODO: Take this stuff in as arguments
   results <- tripInfoByRouteForDay con "77" (read "2019-01-04" :: Day) (hoursToTimeZone (-5))
+  let paths = (resultsToPaths results)
   plotPathsStyle
     [Key Nothing
     ,XLabel "Time"
     ,XTime
+    ,XTicks $ Just ["600"]
     ,YLabel "Progress along route"
     ,YRange (0, 1)
+    ,Grid $ Just ["xtics", "ytics"]
     -- TODO: Output file should also come from args
     ,terminal $ Graphics.Gnuplot.Terminal.PNG.cons "output.png"
+    ,Custom "terminal png size 15360,640" []
     ]
-    (resultsToPaths results)
+    paths
 
 -- TODO: These next two functions should live in their own files and
 -- have tests
 resultsToPaths :: [TripInfo] -> [(PlotStyle, [(Double, Double)])]
 resultsToPaths ts =
   let paths = Map.foldl' (\a b -> b:a) [] $ accumTripInfoMap ts
-  in fmap (\d -> (defaultStyle{plotType = Lines}, prepXTime d)) paths
+  in fmap (\d ->
+             (PlotStyle{plotType = Lines
+                       ,lineSpec = CustomStyle []},
+              prepXTime d)
+          ) paths
 
 accumTripInfoMap :: [TripInfo] -> Map.Map TAPI.TripID [(UTCTime, Double)]
 accumTripInfoMap ts =
