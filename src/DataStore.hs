@@ -65,9 +65,12 @@ insertTripInfoQueryArgs TripInfo{
        latitude, longitude, progress,
        timestamp, trip_id, timestamp)
 
-tripInfoByRouteForDay :: Connection -> TAPI.RouteID -> Day -> IO([TripInfo])
-tripInfoByRouteForDay con routeID day = do
-  tz <- getCurrentTimeZone
+tripInfoByRouteForDay :: Connection ->
+                         TAPI.RouteID ->
+                         Day ->
+                         TimeZone ->
+                         IO([TripInfo])
+tripInfoByRouteForDay con routeID day tz =
   let
     startTime = LocalTime{
       localDay = day

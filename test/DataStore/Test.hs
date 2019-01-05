@@ -5,6 +5,7 @@ module DataStore.Test where
 import Database.SQLite.Simple
 import Data.Time.Calendar
 import Data.Time.Clock
+import Data.Time.LocalTime
 import Test.Tasty
 import Test.Tasty.HUnit
 
@@ -66,6 +67,7 @@ testTripInfoByRouteForDay con = do
                      con
                      "39"
                      (read "2018-12-01" :: Day)
+                     (hoursToTimeZone (-5))
   length tripInfoEntries @?= 1
   head tripInfoEntries @?= tripInfo1
   return con
