@@ -15,19 +15,15 @@ testDBConnection :: IO(Connection)
 testDBConnection = open ":memory:"
 
 dataStoreTests :: TestTree
-dataStoreTests = withResource
-                 testDBConnection
-                 (\c -> close c)
-                 individualTests
+dataStoreTests = testGroup "DataStore"
+  [testCase "Creates table" $ testDBConnection >>= testTableCreation >>= close
+  ,testCase "Inserts row" $ testDBConnection >>= testRowInsert >>= close
+  ,testCase "Don't insert duplicate data points" $
+    testDBConnection >>= testNoDups >>= close
+  ,testCase "tripInfoByRouteforday" $
+    testDBConnection >>= testTripInfoByRouteForDay >>= close]
 
-individualTests :: IO(Connection) -> TestTree
-individualTests con = testGroup "DataStore"
-  [testCase "Creates table" $ con >>= testTableCreation
-  ,testCase "Inserts row" $ con >>= testRowInsert
-  ,testCase "Don't insert duplicate data points" $ con >>= testNoDups
-  ,testCase "tripInfoByRouteforday" $ con >>= testTripInfoByRouteForDay]
-
-testTableCreation :: Connection -> IO()
+testTableCreation :: Connection -> IO(Connection)
 testTableCreation con = do
   createTables con
   tables <- query_
@@ -35,8 +31,9 @@ testTableCreation con = do
     "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'location'"
     :: IO([Only String])
   length tables @?= 1
+  return con
 
-testRowInsert :: Connection -> IO()
+testRowInsert :: Connection -> IO(Connection)
 testRowInsert con = do
   createTables con
   insertTripInfo con [tripInfo1]
@@ -46,8 +43,9 @@ testRowInsert con = do
     :: IO([TripInfo])
   length tripInfoEntries @?= 1
   head tripInfoEntries @?= tripInfo1
+  return con
 
-testNoDups :: Connection -> IO()
+testNoDups :: Connection -> IO(Connection)
 testNoDups con = do
   createTables con
   insertTripInfo con [tripInfo1]
@@ -58,17 +56,19 @@ testNoDups con = do
     :: IO([TripInfo])
   length tripInfoEntries @?= 1
   head tripInfoEntries @?= tripInfo1
+  return con
 
-testTripInfoByRouteForDay :: Connection -> IO()
+testTripInfoByRouteForDay :: Connection -> IO(Connection)
 testTripInfoByRouteForDay con = do
   createTables con
-  insertTripInfo con [tripInfo1]
+  insertTripInfo con [tripInfo1, tripInfo3, tripInfo4]
   tripInfoEntries <- tripInfoByRouteForDay
                      con
                      "39"
                      (read "2018-12-01" :: Day)
   length tripInfoEntries @?= 1
   head tripInfoEntries @?= tripInfo1
+  return con
 
 tripInfo1 :: TripInfo
 tripInfo1 = TripInfo{
@@ -90,4 +90,26 @@ tripInfo2 = TripInfo{
   longitude = 4.0,
   progress = Just 0.5,
   timestamp = read "2018-12-01 20:30:00" :: UTCTime
+  }
+
+tripInfo3 :: TripInfo
+tripInfo3 = TripInfo{
+  trip_id = "123",
+  route_id = "39",
+  direction_id = 0,
+  latitude = 3.0,
+  longitude = 4.0,
+  progress = Just 0.5,
+  timestamp = read "2018-12-01 02:30:00" :: UTCTime
+  }
+
+tripInfo4 :: TripInfo
+tripInfo4 = TripInfo{
+  trip_id = "123",
+  route_id = "77",
+  direction_id = 0,
+  latitude = 3.0,
+  longitude = 4.0,
+  progress = Just 0.5,
+  timestamp = read "2018-12-01 16:30:00" :: UTCTime
   }
