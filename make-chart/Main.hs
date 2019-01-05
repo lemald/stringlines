@@ -2,7 +2,10 @@
 
 module Main where
 
+import Data.List
+import qualified Data.Map.Strict as Map
 import Data.Time.Calendar
+import Data.Time.Clock
 import Data.Time.LocalTime
 import Graphics.Gnuplot.Simple
 import Graphics.Gnuplot.Terminal.PNG
@@ -28,5 +31,20 @@ main = do
     ]
     (resultsToPaths results)
 
+-- TODO: These next two functions should live in their own files and
+-- have tests
 resultsToPaths :: [TripInfo] -> [(PlotStyle, [(Double, Double)])]
-resultsToPaths ts = []
+resultsToPaths ts =
+  let paths = Map.foldl' (\a b -> b:a) [] $ accumTripInfoMap ts
+  in fmap (\d -> (defaultStyle{plotType = Lines}, prepXTime d)) paths
+
+accumTripInfoMap :: [TripInfo] -> Map.Map TAPI.TripID [(UTCTime, Double)]
+accumTripInfoMap ts =
+  Data.List.foldl'
+  (\m t ->
+     case progress t of
+      Just p -> Map.insertWith (++) (trip_id t) [(timestamp t, p)] m
+      Nothing -> m
+  )
+  Map.empty
+  ts
