@@ -3,6 +3,7 @@
 module DataStore.Test where
 
 import Database.SQLite.Simple
+import Data.Time.Calendar
 import Data.Time.Clock
 import Test.Tasty
 import Test.Tasty.HUnit
@@ -23,7 +24,8 @@ individualTests :: IO(Connection) -> TestTree
 individualTests con = testGroup "DataStore"
   [testCase "Creates table" $ con >>= testTableCreation
   ,testCase "Inserts row" $ con >>= testRowInsert
-  ,testCase "Don't insert duplicate data points" $ con >>= testNoDups]
+  ,testCase "Don't insert duplicate data points" $ con >>= testNoDups
+  ,testCase "tripInfoByRouteforday" $ con >>= testTripInfoByRouteForDay]
 
 testTableCreation :: Connection -> IO()
 testTableCreation con = do
@@ -54,6 +56,17 @@ testNoDups con = do
     con
     "SELECT CAST(trip_id AS TEXT), CAST(route_id AS TEXT), direction_id, latitude, longitude, progress, timestamp FROM location"
     :: IO([TripInfo])
+  length tripInfoEntries @?= 1
+  head tripInfoEntries @?= tripInfo1
+
+testTripInfoByRouteForDay :: Connection -> IO()
+testTripInfoByRouteForDay con = do
+  createTables con
+  insertTripInfo con [tripInfo1]
+  tripInfoEntries <- tripInfoByRouteForDay
+                     con
+                     "39"
+                     (read "2018-12-01" :: Day)
   length tripInfoEntries @?= 1
   head tripInfoEntries @?= tripInfo1
 

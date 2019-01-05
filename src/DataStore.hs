@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE DuplicateRecordFields #-}
 
 module DataStore where
 
@@ -6,8 +7,12 @@ import Control.Applicative
 import qualified Data.Text as T
 import Database.SQLite.Simple
 import Database.SQLite.Simple.FromRow
+import Data.Time.Calendar
+import Data.Time.Clock
+import Data.Time.LocalTime
 
 import Client
+import TAPI
 
 instance FromRow TripInfo where
   fromRow = TripInfo <$> field <*> field <*> field
@@ -42,6 +47,46 @@ insertTripInfo con ts =
   executeMany
   con
   "INSERT INTO location (trip_id, route_id, direction_id, latitude, longitude, progress, timestamp) SELECT ?,?,?,?,?,?,? WHERE NOT EXISTS (SELECT 1 FROM location WHERE trip_id = ? AND timestamp = ?)"
-  (fmap (\t -> (trip_id t, route_id t, direction_id t,
-                latitude t, longitude t, progress t,
-                timestamp t, trip_id t, timestamp t)) ts)
+  (fmap insertTripInfoQueryArgs ts)
+
+insertTripInfoQueryArgs :: TripInfo ->
+                           (TAPI.TripID, TAPI.RouteID, TAPI.DirectionID,
+                            Double, Double, Maybe Double, UTCTime,
+                            TAPI.TripID, UTCTime)
+insertTripInfoQueryArgs TripInfo{
+  trip_id = trip_id
+  ,route_id = route_id
+  ,direction_id = direction_id
+  ,latitude = latitude
+  ,longitude = longitude
+  ,progress = progress
+  ,timestamp = timestamp
+  } = (trip_id , route_id, direction_id,
+       latitude, longitude, progress,
+       timestamp, trip_id, timestamp)
+
+tripInfoByRouteForDay :: Connection -> TAPI.RouteID -> Day -> IO([TripInfo])
+tripInfoByRouteForDay con routeID day = do
+  tz <- getCurrentTimeZone
+  let
+    startTime = LocalTime{
+      localDay = day
+      ,localTimeOfDay = TimeOfDay{
+          todHour = 3
+          ,todMin = 30
+          ,todSec = 0
+          }
+      }
+    endTime = LocalTime{
+      localDay = addDays 1 day
+      ,localTimeOfDay = TimeOfDay{
+          todHour = 2
+          ,todMin = 30
+          ,todSec = 0
+          }
+      }
+    in query
+       con
+       "SELECT CAST(trip_id AS TEXT), CAST(route_id AS TEXT), direction_id, latitude, longitude, progress, timestamp FROM location WHERE route_id = ? AND DATETIME(timestamp) > DATETIME(?) AND DATETIME(timestamp) < DATETIME(?) ORDER BY DATETIME(timestamp)"
+       (routeID, localTimeToUTC tz startTime, localTimeToUTC tz endTime)
+  
