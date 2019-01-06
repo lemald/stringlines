@@ -40,7 +40,7 @@ main = do
 -- have tests
 resultsToPaths :: [TripInfo] -> [(PlotStyle, [(Double, Double)])]
 resultsToPaths ts =
-  let paths = Map.foldl' (flip (:)) [] $ accumTripInfoMap ts
+  let paths = foldl' (flip (:)) [] $ accumTripInfoMap ts
   in fmap (\d ->
              (PlotStyle{plotType = Lines
                        ,lineSpec = CustomStyle []},
@@ -49,7 +49,7 @@ resultsToPaths ts =
 
 accumTripInfoMap :: [TripInfo] -> Map.Map TAPI.TripID [(UTCTime, Double)]
 accumTripInfoMap ts =
-  Data.List.foldl'
+  foldl'
   (\m t ->
      case progress t of
       Just p -> Map.insertWith (++) (trip_id t) [(timestamp t, p)] m
