@@ -4,6 +4,7 @@ module Main where
 
 import Data.List
 import qualified Data.Map.Strict as Map
+import Data.Sequence
 import Data.Time.Calendar
 import Data.Time.Clock
 import Data.Time.LocalTime
@@ -45,14 +46,14 @@ resultsToPaths ts =
              (PlotStyle{plotType = Lines
                        ,lineSpec = CustomStyle []},
               prepXTime d)
-          ) paths
+          ) $ fmap (foldl' (flip (:)) []) paths
 
-accumTripInfoMap :: [TripInfo] -> Map.Map TAPI.TripID [(UTCTime, Double)]
+accumTripInfoMap :: [TripInfo] -> Map.Map TAPI.TripID (Seq (UTCTime, Double))
 accumTripInfoMap ts =
   foldl'
   (\m t ->
      case progress t of
-      Just p -> Map.insertWith (++) (trip_id t) [(timestamp t, p)] m
+      Just p -> Map.insertWith (><) (trip_id t) (singleton (timestamp t, p)) m
       Nothing -> m
   )
   Map.empty
