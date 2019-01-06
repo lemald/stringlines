@@ -42,7 +42,7 @@ main = do
 -- have tests
 resultsToPaths :: [TripInfo] -> [(PlotStyle, [(Double, Double)])]
 resultsToPaths ts =
-  let paths = foldl' (flip (:)) [] $ accumTripInfoMap ts
+  let paths = foldr' (:) [] $ accumTripInfoMap ts
   in fmap (\d ->
              (PlotStyle{plotType = Lines
                        ,lineSpec = CustomStyle []},
