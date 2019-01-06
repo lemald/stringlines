@@ -24,9 +24,9 @@ main = do
   let paths = (resultsToPaths results)
   plotPathsStyle
     [Key Nothing
-    ,XLabel "Time"
+    ,XLabel "Time (UTC)"
     ,XTime
-    ,XTicks $ Just ["600"]
+    ,XTicks $ Just ["600", "offset 0,graph 0.015"]
     ,YLabel "Progress along route"
     ,YRange (0, 1)
     ,Grid $ Just ["xtics", "ytics"]
