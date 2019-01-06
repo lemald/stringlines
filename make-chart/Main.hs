@@ -2,6 +2,7 @@
 
 module Main where
 
+import Data.Foldable
 import Data.List
 import qualified Data.Map.Strict as Map
 import Data.Sequence
@@ -46,7 +47,7 @@ resultsToPaths ts =
              (PlotStyle{plotType = Lines
                        ,lineSpec = CustomStyle []},
               prepXTime d)
-          ) $ fmap (foldl' (flip (:)) []) paths
+          ) $ fmap (foldr' (:) []) paths
 
 accumTripInfoMap :: [TripInfo] -> Map.Map TAPI.TripID (Seq (UTCTime, Double))
 accumTripInfoMap ts =
