@@ -47,7 +47,7 @@ resultsToPaths ts =
              (PlotStyle{plotType = Lines
                        ,lineSpec = CustomStyle []},
               prepXTime d)
-          ) $ fmap (foldr' (:) []) paths
+          ) $ fmap toList paths
 
 accumTripInfoMap :: [TripInfo] -> Map.Map TAPI.TripID (Seq (UTCTime, Double))
 accumTripInfoMap ts =
