@@ -40,7 +40,7 @@ main = do
 -- have tests
 resultsToPaths :: [TripInfo] -> [(PlotStyle, [(Double, Double)])]
 resultsToPaths ts =
-  let paths = Map.foldl' (\a b -> b:a) [] $ accumTripInfoMap ts
+  let paths = Map.foldl' (flip (:)) [] $ accumTripInfoMap ts
   in fmap (\d ->
              (PlotStyle{plotType = Lines
                        ,lineSpec = CustomStyle []},
