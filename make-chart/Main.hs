@@ -17,6 +17,8 @@ import Graphics.Gnuplot.Terminal.PNG
 import Graphics.Gnuplot.Time
 import System.Console.GetOpt
 import System.Environment
+import System.Exit
+import System.IO
 
 import Client
 import DataStore
@@ -63,9 +65,22 @@ options =
 main :: IO()
 main = do
   argv <- getArgs
+  params <- argsToParams argv
+  case params of
+    Left e -> do
+      hPutStrLn stderr ("Error: " ++ e)
+      exitWith $ ExitFailure 1
+    Right p -> makeChartFromParams p
+
+makeChartFromParams :: Params -> IO()
+makeChartFromParams p = do
   con <- connectToDB
   -- TODO: Take this stuff in as arguments
-  results <- tripInfoByRouteForDay con "77" (read "2019-01-04" :: Day) (hoursToTimeZone (-5))
+  results <- tripInfoByRouteForDay
+             con
+             (paramRouteID p)
+             (paramDate p)
+             (hoursToTimeZone $ paramTzOffset p)
   let paths = (resultsToPaths results)
   plotPathsStyle
     [Key Nothing
@@ -76,7 +91,7 @@ main = do
     ,YRange (0, 1)
     ,Grid $ Just ["xtics", "ytics"]
     -- TODO: Output file should also come from args
-    ,terminal $ Graphics.Gnuplot.Terminal.PNG.cons "output.png"
+    ,terminal $ Graphics.Gnuplot.Terminal.PNG.cons $ paramOutFile p
     ,Custom "terminal png size 15360,640" []
     ]
     paths
@@ -86,19 +101,20 @@ argsToParams :: [String] -> IO(Either String Params)
 argsToParams argv =
   case getOpt Permute options argv of
     (o, _, []  ) -> do
-      let opts = foldl (flip Prelude.id) defaultOptions o
-      let params =
-            Params
-            <$> case optRouteID opts of
-                  ""  -> Left "No route ID specified"
-                  rID -> Right rID
-            <*> (Right $ read (optDateStr opts))
-            <*> (Right $ read (optTzOffsetStr opts))
-            <*> (Right $ optOutFile opts)
-      return params
+      let opts = foldr ($) defaultOptions o
+      return
+        (Params
+         <$> case optRouteID opts of
+               ""  -> Left "No route ID specified"
+               rID -> Right rID
+         <*> case optDateStr opts of
+               "" -> Left "No date specified"
+               d  -> Right $ read d
+         <*> (Right $ read (optTzOffsetStr opts))
+         <*> (Right $ optOutFile opts))
     (_, _, errs) -> ioError (userError
                              (concat errs ++ usageInfo header options))
-  where header = "Usage: " ++ (head argv) ++ "[OPTION...]"
+  where header = "Usage: [OPTION...]"
 
 -- TODO: These next two functions should live in their own files and
 -- have tests
