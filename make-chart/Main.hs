@@ -82,18 +82,20 @@ main = do
     paths
   closeDBCon con
 
-argsToParams :: [String] -> IO(Params)
+argsToParams :: [String] -> IO(Either String Params)
 argsToParams argv =
   case getOpt Permute options argv of
     (o, _, []  ) -> do
       let opts = foldl (flip Prelude.id) defaultOptions o
-      dateRes <- Ex.try $ Ex.evaluate (read (optDateStr opts) :: Day) :: IO(Either Ex.SomeException Day)
-      return Params
-        {paramRouteID = "77"
-        ,paramDate = read "2019-01-04"
-        ,paramTzOffset = (-5)
-        ,paramOutFile = "output.png"
-        }
+      let params =
+            Params
+            <$> case optRouteID opts of
+                  ""  -> Left "No route ID specified"
+                  rID -> Right rID
+            <*> (Right $ read (optDateStr opts))
+            <*> (Right $ read (optTzOffsetStr opts))
+            <*> (Right $ optOutFile opts)
+      return params
     (_, _, errs) -> ioError (userError
                              (concat errs ++ usageInfo header options))
   where header = "Usage: " ++ (head argv) ++ "[OPTION...]"
