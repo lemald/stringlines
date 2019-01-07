@@ -2,10 +2,12 @@
 
 module Main where
 
+import qualified Control.Exception as Ex
 import Data.Foldable
 import Data.List
 import qualified Data.Map.Strict as Map
 import Data.Sequence
+import qualified Data.Text as T
 import Data.Time.Calendar
 import Data.Time.Clock
 import Data.Time.LocalTime
@@ -13,13 +15,54 @@ import Graphics.Gnuplot.LineSpecification
 import Graphics.Gnuplot.Simple
 import Graphics.Gnuplot.Terminal.PNG
 import Graphics.Gnuplot.Time
+import System.Console.GetOpt
+import System.Environment
 
 import Client
 import DataStore
 import TAPI
 
+data Options = Options
+  { optRouteID :: TAPI.RouteID
+  , optDateStr :: String
+  , optTzOffsetStr :: String
+  , optOutFile :: String
+  }
+
+defaultOptions :: Options
+defaultOptions = Options
+  { optRouteID = ""
+  , optDateStr = ""
+  , optTzOffsetStr = "-5"
+  , optOutFile = "output.png"
+  }
+
+data Params = Params
+  { paramRouteID :: TAPI.RouteID
+  , paramDate :: Day
+  , paramTzOffset :: Int
+  , paramOutFile :: String
+  }
+
+options :: [OptDescr (Options -> Options)]
+options =
+  [Option ['r'] ["route"]
+    (ReqArg (\r opts -> opts{ optRouteID = T.pack r }) "ROUTE")
+    "route ID"
+  ,Option ['d'] ["date"]
+    (ReqArg (\d opts -> opts{ optDateStr = d }) "DATE")
+    "date"
+  ,Option ['z'] ["tzoffset"]
+    (ReqArg (\z opts -> opts{ optTzOffsetStr = z }) "OFFSET")
+    "time zone offset"
+  ,Option ['o'] ["output"]
+    (ReqArg (\o opts -> opts{ optOutFile = o }) "FILE")
+    "output file"
+  ]
+
 main :: IO()
 main = do
+  argv <- getArgs
   con <- connectToDB
   -- TODO: Take this stuff in as arguments
   results <- tripInfoByRouteForDay con "77" (read "2019-01-04" :: Day) (hoursToTimeZone (-5))
@@ -37,6 +80,23 @@ main = do
     ,Custom "terminal png size 15360,640" []
     ]
     paths
+  closeDBCon con
+
+argsToParams :: [String] -> IO(Params)
+argsToParams argv =
+  case getOpt Permute options argv of
+    (o, _, []  ) -> do
+      let opts = foldl (flip Prelude.id) defaultOptions o
+      dateRes <- Ex.try $ Ex.evaluate (read (optDateStr opts) :: Day) :: IO(Either Ex.SomeException Day)
+      return Params
+        {paramRouteID = "77"
+        ,paramDate = read "2019-01-04"
+        ,paramTzOffset = (-5)
+        ,paramOutFile = "output.png"
+        }
+    (_, _, errs) -> ioError (userError
+                             (concat errs ++ usageInfo header options))
+  where header = "Usage: " ++ (head argv) ++ "[OPTION...]"
 
 -- TODO: These next two functions should live in their own files and
 -- have tests
