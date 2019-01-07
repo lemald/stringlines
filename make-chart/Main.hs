@@ -75,7 +75,6 @@ main = do
 makeChartFromParams :: Params -> IO()
 makeChartFromParams p = do
   con <- connectToDB
-  -- TODO: Take this stuff in as arguments
   results <- tripInfoByRouteForDay
              con
              (paramRouteID p)
