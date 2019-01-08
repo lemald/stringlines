@@ -107,8 +107,8 @@ makeChartFromParams p = do
 argsToParams :: [String] -> IO(Either String Params)
 argsToParams argv =
   case getOpt Permute options argv of
-    (o, _, []  ) -> do
-      let opts = foldr ($) defaultOptions o
+    (o, _, []) -> do
+      let opts = foldl (flip Prelude.id) defaultOptions o
       return
         (Params
          <$> case optRouteID opts of
