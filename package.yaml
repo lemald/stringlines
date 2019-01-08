@@ -46,6 +46,17 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - bus-scrape
+  bus-scrape-make-chart:
+    main:                Main.hs
+    source-dirs:         make-chart
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - bus-scrape
+    - gnuplot
+    - containers
 
 tests:
   bus-scrape-test:
