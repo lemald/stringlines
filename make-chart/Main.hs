@@ -19,6 +19,7 @@ import System.Console.GetOpt
 import System.Environment
 import System.Exit
 import System.IO
+import Text.Read
 
 import Client
 import DataStore
@@ -29,6 +30,7 @@ data Options = Options
   , optDateStr :: String
   , optTzOffsetStr :: String
   , optOutFile :: String
+  , optDBFile :: String
   }
 
 defaultOptions :: Options
@@ -37,6 +39,7 @@ defaultOptions = Options
   , optDateStr = ""
   , optTzOffsetStr = "-5"
   , optOutFile = "output.png"
+  , optDBFile = "locations.db"
   }
 
 data Params = Params
@@ -44,6 +47,7 @@ data Params = Params
   , paramDate :: Day
   , paramTzOffset :: Int
   , paramOutFile :: String
+  , paramDBFile :: String
   }
 
 options :: [OptDescr (Options -> Options)]
@@ -60,6 +64,10 @@ options =
   ,Option ['o'] ["output"]
     (ReqArg (\o opts -> opts{ optOutFile = o }) "FILE")
     "output file"
+  -- TODO: Make this option actually do something
+  ,Option ['b'] ["database"]
+    (ReqArg (\b opts -> opts{ optDBFile = b }) "FILE")
+    "database file"
   ]
 
 main :: IO()
@@ -108,9 +116,14 @@ argsToParams argv =
                rID -> Right rID
          <*> case optDateStr opts of
                "" -> Left "No date specified"
-               d  -> Right $ read d
-         <*> (Right $ read (optTzOffsetStr opts))
-         <*> (Right $ optOutFile opts))
+               d  -> case readMaybe d of
+                       Nothing -> Left "Invalid date"
+                       Just d  -> Right d
+         <*> case readMaybe (optTzOffsetStr opts) of
+               Nothing -> Left "Invalid time zone offset"
+               Just o  -> Right o
+         <*> (Right $ optOutFile opts)
+         <*> (Right $ optDBFile opts))
     (_, _, errs) -> ioError (userError
                              (concat errs ++ usageInfo header options))
   where header = "Usage: [OPTION...]"
