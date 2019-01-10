@@ -37,7 +37,7 @@ library:
   source-dirs: src
 
 executables:
-  bus-scrape-exe:
+  bus-scrape-poll:
     main:                Main.hs
     source-dirs:         app
     ghc-options:
