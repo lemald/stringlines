@@ -35,7 +35,6 @@ A whole bunch of things. Here are some of the more important items:
 - Visual improvements to the output.
 - Command line arguments for the polling executable. Routes will
   probably need to be configured via a config file.
-- Make sure modules only export what they need to export.
 - Refactor the data gathering to at least make using other data
   sources possible.
 - Update time zone handling to store the original zoned time returned
