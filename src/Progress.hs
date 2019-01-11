@@ -1,4 +1,8 @@
-module Progress where
+module Progress (
+  progressOnRoute
+  ,shapeToPoints
+  ,closestPointAlongRoute
+  ) where
 
 import TAPI
 import Data.Geo.Jord.Geodetics

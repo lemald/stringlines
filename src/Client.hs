@@ -1,7 +1,23 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 
-module Client where
+module Client (
+  getVehicles
+  ,getShapes
+  ,queryAPI
+  ,tripInfoFromResponse
+  ,tripInfoFromVehicle
+  ,entitiesFromResponse
+  ,attributesByID
+  ,TripInfo(trip_id
+           ,route_id
+           ,direction_id
+           ,latitude
+           ,longitude
+           ,progress
+           ,timestamp
+           ,TripInfo)
+  ) where
 
 import Data.Proxy
 import Data.Text

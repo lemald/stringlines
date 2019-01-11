@@ -1,7 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 
-module DataStore where
+module DataStore (
+  connectToDB
+  ,closeDBCon
+  ,createTables
+  ,insertTripInfo
+  ,tripInfoByRouteForDay
+  ) where
 
 import Control.Applicative
 import qualified Data.Text as T
