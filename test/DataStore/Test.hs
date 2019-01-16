@@ -62,10 +62,11 @@ testNoDups con = do
 testTripInfoByRouteForDay :: Connection -> IO(Connection)
 testTripInfoByRouteForDay con = do
   createTables con
-  insertTripInfo con [tripInfo1, tripInfo3, tripInfo4]
+  insertTripInfo con [tripInfo1, tripInfo3, tripInfo4, tripInfo5]
   tripInfoEntries <- tripInfoByRouteForDay
                      con
                      "39"
+                     [0]
                      (read "2018-12-01" :: Day)
                      (hoursToTimeZone (-5))
   length tripInfoEntries @?= 1
@@ -114,4 +115,15 @@ tripInfo4 = TripInfo{
   longitude = 4.0,
   progress = Just 0.5,
   timestamp = read "2018-12-01 16:30:00" :: UTCTime
+  }
+
+tripInfo5 :: TripInfo
+tripInfo5 = TripInfo{
+  trip_id = "123",
+  route_id = "39",
+  direction_id = 1,
+  latitude = 1.0,
+  longitude = 2.0,
+  progress = Just 0.5,
+  timestamp = read "2018-12-01 18:30:00" :: UTCTime
   }

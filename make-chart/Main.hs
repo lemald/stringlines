@@ -31,6 +31,8 @@ data Options = Options
   , optTzOffsetStr :: String
   , optOutFile :: String
   , optDBFile :: String
+  , optDir0 :: Bool
+  , optDir1 :: Bool
   }
 
 defaultOptions :: Options
@@ -40,6 +42,8 @@ defaultOptions = Options
   , optTzOffsetStr = "-5"
   , optOutFile = "output.png"
   , optDBFile = "locations.db"
+  , optDir0 = False
+  , optDir1 = False
   }
 
 data Params = Params
@@ -48,6 +52,8 @@ data Params = Params
   , paramTzOffset :: Int
   , paramOutFile :: String
   , paramDBFile :: String
+  , paramDir0 :: Bool
+  , paramDir1 :: Bool
   }
 
 options :: [OptDescr (Options -> Options)]
@@ -68,6 +74,12 @@ options =
   ,Option ['b'] ["database"]
     (ReqArg (\b opts -> opts{ optDBFile = b }) "FILE")
     "database file"
+  ,Option [] ["direction0"]
+    (NoArg (\opts -> opts{ optDir0 = True }))
+    "include direction ID 0"
+  ,Option [] ["direction1"]
+    (NoArg (\opts -> opts{ optDir1 = True }))
+    "include direction ID 1"
   ]
 
 main :: IO()
@@ -86,6 +98,8 @@ makeChartFromParams p = do
   results <- tripInfoByRouteForDay
              con
              (paramRouteID p)
+             ((if paramDir0 p then [0] else []) ++
+              (if paramDir1 p then [1] else []))
              (paramDate p)
              (hoursToTimeZone $ paramTzOffset p)
   let paths = (resultsToPaths results)
@@ -123,7 +137,13 @@ argsToParams argv =
                Nothing -> Left "Invalid time zone offset"
                Just o  -> Right o
          <*> (Right $ optOutFile opts)
-         <*> (Right $ optDBFile opts))
+         <*> (Right $ optDBFile opts)
+         <*> (Right $ if not ((optDir0 opts) || (optDir1 opts))
+                      then True
+                      else (optDir0 opts))
+         <*> (Right $ if not ((optDir0 opts) || (optDir1 opts))
+                      then True
+                      else (optDir1 opts)))
     (_, _, errs) -> ioError (userError
                              (concat errs ++ usageInfo header options))
   where header = "Usage: [OPTION...]"

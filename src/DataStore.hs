@@ -10,6 +10,7 @@ module DataStore (
   ) where
 
 import Control.Applicative
+import Control.Monad
 import qualified Data.Text as T
 import Database.SQLite.Simple
 import Database.SQLite.Simple.FromRow
@@ -73,10 +74,11 @@ insertTripInfoQueryArgs TripInfo{
 
 tripInfoByRouteForDay :: Connection ->
                          TAPI.RouteID ->
+                         [TAPI.DirectionID] ->
                          Day ->
                          TimeZone ->
                          IO([TripInfo])
-tripInfoByRouteForDay con routeID day tz =
+tripInfoByRouteForDay con routeID dirs day tz =
   let
     startTime = LocalTime{
       localDay = day
@@ -94,8 +96,12 @@ tripInfoByRouteForDay con routeID day tz =
           ,todSec = 0
           }
       }
-    in query
-       con
-       "SELECT CAST(trip_id AS TEXT), CAST(route_id AS TEXT), direction_id, latitude, longitude, progress, timestamp FROM location WHERE route_id = ? AND DATETIME(timestamp) > DATETIME(?) AND DATETIME(timestamp) < DATETIME(?) ORDER BY DATETIME(timestamp)"
-       (routeID, localTimeToUTC tz startTime, localTimeToUTC tz endTime)
+    in do
+    results <- mapM
+               (\d -> query
+                 con
+                 "SELECT CAST(trip_id AS TEXT), CAST(route_id AS TEXT), direction_id, latitude, longitude, progress, timestamp FROM location WHERE route_id = ? AND direction_id = ? AND DATETIME(timestamp) > DATETIME(?) AND DATETIME(timestamp) < DATETIME(?) ORDER BY DATETIME(timestamp)"
+                 (routeID, d, localTimeToUTC tz startTime, localTimeToUTC tz endTime))
+               dirs
+    return $ concat results
   
