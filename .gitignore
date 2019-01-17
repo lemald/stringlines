@@ -1,5 +1,5 @@
 .stack-work/
-bus-scrape.cabal
+stringlines.cabal
 *~
 .dir-locals.el
 *.db

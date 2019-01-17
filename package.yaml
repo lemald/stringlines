@@ -1,10 +1,10 @@
-name:                bus-scrape
+name:                stringlines
 version:             0.1.0.0
-github:              "lemald/bus-scrape"
+github:              "lemald/stringlines"
 license:             BSD3
 author:              "Eddie Maldonado"
 maintainer:          "eddie@lemald.org"
-copyright:           "2018 Eddie Maldonado"
+copyright:           "2018-2019 Eddie Maldonado"
 
 extra-source-files:
 - README.md
@@ -37,7 +37,7 @@ library:
   source-dirs: src
 
 executables:
-  bus-scrape-poll:
+  stringlines-poll:
     main:                Main.hs
     source-dirs:         app
     ghc-options:
@@ -45,21 +45,21 @@ executables:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - bus-scrape
-  bus-scrape-make-chart:
+    - stringlines
+  stringlines-chart:
     main:                Main.hs
-    source-dirs:         make-chart
+    source-dirs:         chart
     ghc-options:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - bus-scrape
+    - stringlines
     - gnuplot
     - containers
 
 tests:
-  bus-scrape-test:
+  stringlines-test:
     main:                Spec.hs
     source-dirs:         test
     ghc-options:
@@ -67,6 +67,6 @@ tests:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - bus-scrape
+    - stringlines
     - tasty
     - tasty-hunit
