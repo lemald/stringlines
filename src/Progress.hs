@@ -1,3 +1,5 @@
+{-# LANGUAGE DuplicateRecordFields #-}
+
 module Progress (
   progressOnRoute
   ,shapeToPoints
@@ -26,7 +28,7 @@ progressOnRoute vehicleLat vehicleLong shape = let
            (progressOnRoute' p)
            (metres 0.0, metres 0.0, Nothing, False)
            points
-         in Just (toMetres covered / toMetres total)
+         in Just $ invertProgress (toMetres covered / toMetres total) shape
 
 progressOnRoute' :: LatLong ->
                     (Length, Length, Maybe LatLong, Bool) ->
@@ -43,10 +45,18 @@ progressOnRoute' cp (vehicleDist, totalDist, Just p1, pointSeen) p2 =
       pointSeen' = pointSeen || (p2 == cp)
   in (vehicleDist', totalDist', Just p2, pointSeen')
 
+invertProgress :: Double -> Shape -> Double
+invertProgress p s = case shapeDirectionID s of
+  0 -> p
+  1 -> 1 - p
+
 shapeToPoints :: Shape -> [LatLong]
 shapeToPoints s = let
   line = decodeline (T.unpack $ polyline s)
   in fmap (\(lat, lon) -> decimalLatLong lat lon) line
+
+shapeDirectionID :: Shape -> TAPI.DirectionID
+shapeDirectionID Shape{ direction_id = d } = d
 
 closestPointAlongRoute :: LatLong -> [LatLong] -> Maybe LatLong
 closestPointAlongRoute pos ps = let

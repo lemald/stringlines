@@ -16,12 +16,12 @@ and uses Gnuplot to produce the final output.
 
 Parameters for polling are currently stored in the source in
 `app/Main.hs`. These will be moved to command line arguments soon. To
-run the polling executable, just do `stack run bus-scrape-poll`.
+run the polling executable, just do `stack run stringlines-poll`.
 
 ### Chart generation
 
-This step can be run with `stack run bus-scrape-make-chart` followed
-by a `--` and the rest of the command line arguments. These are mostly
+This step can be run with `stack run stringlines-chart` followed by a
+`--` and the rest of the command line arguments. These are mostly
 self-documented in the usage message - note that you'll need to
 specify `-r` for a route ID and `-d` for a day.
 
@@ -29,9 +29,6 @@ specify `-r` for a route ID and `-d` for a day.
 
 A whole bunch of things. Here are some of the more important items:
 
-- Support routes with an asymmetry in the two directions, probably by
-  allowing separate charts to be generated for different directions.
-  Should still allow symmetric routes to be plotted on the same chart.
 - Visual improvements to the output.
 - Command line arguments for the polling executable. Routes will
   probably need to be configured via a config file.
