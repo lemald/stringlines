@@ -40,3 +40,7 @@ A whole bunch of things. Here are some of the more important items:
 - Look into whether I actually need Jord or if I can use a more
   lightweight library that's supported by default in the solver I'm
   using.
+- Do calculation of progress at chart generation rather than polling.
+  Refactor calculation of progress to not parse the polyline for every
+  data point.
+- Support charting shared trunks where several routes converge.
