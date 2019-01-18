@@ -36,9 +36,8 @@ main = do
   h <- do
     nh <- streamHandler stderr DEBUG
     return $ setFormatter nh (simpleLogFormatter "[$time $prio] $msg\n")
-  updateGlobalLogger rootLoggerName removeHandler
-  updateGlobalLogger "stringlines.poll" ((setHandlers [h]) .
-                                         (System.Log.Logger.setLevel INFO))
+  updateGlobalLogger rootLoggerName ((setHandlers [h]) .
+                                     (System.Log.Logger.setLevel INFO))
 
   con <- connectToDB
   createTables con
