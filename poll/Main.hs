@@ -6,15 +6,18 @@ import Control.Concurrent
 import Control.Concurrent.MVar
 import qualified Control.Exception as Ex
 import Control.Monad
+import Data.Either
 import qualified Data.Text as T
 import Database.SQLite.Simple
 import GHC.IO.Handle.FD
+import System.Exit
 import System.Log.Logger
 import System.Log.Formatter
 import System.Log.Handler
 import System.Log.Handler.Simple
 
 import Client
+import Config
 import DataStore
 import TAPI
 
@@ -38,6 +41,15 @@ main = do
     return $ setFormatter nh (simpleLogFormatter "[$time $prio] $msg\n")
   updateGlobalLogger rootLoggerName ((setHandlers [h]) .
                                      (System.Log.Logger.setLevel INFO))
+
+  confRes <- readConfig "config.yaml"
+  if isLeft confRes
+    then do
+    errorM
+      "stringlines.poll"
+      ("Couldn't parse configuration file: " ++ (fromLeft "" confRes))
+    exitWith $ ExitFailure 1
+    else return ()
 
   con <- connectToDB
   createTables con

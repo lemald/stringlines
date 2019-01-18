@@ -30,5 +30,9 @@ data Config = Config {
 instance FromJSON Config where
   parseJSON = genericParseJSON $ dropFieldOptions 4
 
-readConfig :: FilePath -> IO(Either ParseException Config)
-readConfig fp = decodeFileEither fp
+readConfig :: FilePath -> IO(Either String Config)
+readConfig fp = do
+  decodeRes <- decodeFileEither fp
+  return $ case decodeRes of
+             Left pe -> Left $ prettyPrintParseException pe
+             Right c -> Right c
