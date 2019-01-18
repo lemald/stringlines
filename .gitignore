@@ -4,3 +4,4 @@ stringlines.cabal
 .dir-locals.el
 *.db
 *.png
+config.yaml

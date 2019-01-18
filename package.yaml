@@ -26,6 +26,7 @@ dependencies:
 - text
 - time
 - aeson
+- yaml
 - http-client
 - http-client-tls
 - http-media
