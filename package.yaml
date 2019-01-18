@@ -46,6 +46,7 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - stringlines
+    - hslogger
   stringlines-chart:
     main:                Main.hs
     source-dirs:         chart
