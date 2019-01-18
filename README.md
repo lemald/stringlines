@@ -44,3 +44,5 @@ A whole bunch of things. Here are some of the more important items:
   Refactor calculation of progress to not parse the polyline for every
   data point.
 - Support charting shared trunks where several routes converge.
+- Use `fieldLabelModifier` to clean up a bunch of duplicate record
+  fields in the API and probably clean up some code as a result.
