@@ -59,9 +59,9 @@ runner = do
   -- Further validation of config (mainly around shape IDs) and
   -- translation to some better inernal structure goes here
 
-  liftIO $ runThreads cfg
-
-  liftIO $ infoM "stringlines.poll" "All child threads exited, shutting down."
+  liftIO $ do
+    runThreads cfg
+    infoM "stringlines.poll" "All child threads exited, shutting down."
 
 runThreads :: Config -> IO()
 runThreads cfg = do
