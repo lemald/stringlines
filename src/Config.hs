@@ -23,7 +23,7 @@ instance FromJSON RouteCfg where
   parseJSON = genericParseJSON $ dropFieldOptions 10
 
 data Config = Config {
-  cfg_api_key :: String
+  cfg_api_key :: T.Text
   ,cfg_routes :: [RouteCfg]
   } deriving (Generic, Show)
 

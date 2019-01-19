@@ -56,6 +56,8 @@ runner = do
            Left e -> throwError
                      ("Couldn't parse configuration file: " ++ e)
            Right c -> return c
+  -- Further validation of config (mainly around shape IDs) and
+  -- translation to some better inernal structure goes here
 
   con <- liftIO $ connectToDB
   liftIO $ createTables con
@@ -63,7 +65,7 @@ runner = do
   mvars <- liftIO $ mapM (\r -> do
                              mvar <- newEmptyMVar
                              thread <- forkFinally
-                               (initiateRouteLoop r con)
+                               (initiateRouteLoop r con (cfg_api_key cfg))
                                (putMVar mvar)
                              return mvar)
            routes
@@ -72,18 +74,18 @@ runner = do
   liftIO $ infoM "stringlines.poll" "All child threads exited, shutting down."
   liftIO $ closeDBCon con
 
-initiateRouteLoop :: RouteConf -> Connection -> IO()
-initiateRouteLoop rc con = do
-  shapeResponse <- queryAPI $ getShapes (routeConfRoute rc)
+initiateRouteLoop :: RouteConf -> Connection -> T.Text -> IO()
+initiateRouteLoop rc con apiKey = do
+  shapeResponse <- queryAPI apiKey $ getShapes (routeConfRoute rc)
   case shapeResponse of
     (Left err) -> errorM "stringlines.poll" ("Error fetching shape data from API: "
                                               ++ show err)
     (Right apires) -> let shapeEntities = entitiesFromResponse apires
-                      in routeLoop rc shapeEntities con
+                      in routeLoop apiKey rc shapeEntities con
 
-routeLoop :: RouteConf -> [Entity Shape] -> Connection -> IO()
-routeLoop rc shapeEntities con = do
-  res <- queryAPI $ getVehicles (routeConfRoute rc)
+routeLoop :: T.Text -> RouteConf -> [Entity Shape] -> Connection -> IO()
+routeLoop apiKey rc shapeEntities con = do
+  res <- queryAPI apiKey $ getVehicles (routeConfRoute rc)
   case res of
     (Left err) -> errorM
                   "stringlines.poll"
@@ -109,6 +111,6 @@ routeLoop rc shapeEntities con = do
         Right _ -> return()
            
   threadDelay (15 * 1000 * 1000)
-  routeLoop rc shapeEntities con
+  routeLoop apiKey rc shapeEntities con
   
   

@@ -20,7 +20,7 @@ module Client (
   ) where
 
 import Data.Proxy
-import Data.Text
+import qualified Data.Text as T
 import Data.Time (UTCTime)
 import Network.HTTP.Client (newManager)
 import Network.HTTP.Client.TLS
@@ -33,30 +33,29 @@ import Progress
 api :: Proxy TAPI
 api = Proxy
 
-vehicles :: Maybe Text         -- API key
+vehicles :: Maybe T.Text       -- API key
          -> Maybe TAPI.RouteID -- Route ID
          -> ClientM (APIResponse (Entity Vehicle))
 
-shapes :: Maybe Text         -- API key
+shapes :: Maybe T.Text       -- API key
        -> Maybe TAPI.RouteID -- Route ID
        -> ClientM (APIResponse (Entity Shape))
 
 vehicles :<|> shapes = client api
 
-apiKey :: Text
-apiKey = "***REMOVED***"
+getVehicles :: TAPI.RouteID -> T.Text -> ClientM (APIResponse (Entity Vehicle))
+getVehicles route k = vehicles (Just k) (Just route)
 
-getVehicles :: TAPI.RouteID -> ClientM (APIResponse (Entity Vehicle))
-getVehicles route = vehicles (Just apiKey) (Just route)
+getShapes :: TAPI.RouteID -> T.Text -> ClientM (APIResponse (Entity Shape))
+getShapes route k = shapes (Just k) (Just route)
 
-getShapes :: TAPI.RouteID -> ClientM (APIResponse (Entity Shape))
-getShapes route = shapes (Just apiKey) (Just route)
-
-queryAPI :: ClientM (APIResponse a) -> IO (Either ServantError (APIResponse a))
-queryAPI queryFunc = do
+queryAPI :: T.Text ->
+            (T.Text -> ClientM (APIResponse a)) ->
+            IO (Either ServantError (APIResponse a))
+queryAPI apiKey queryFunc = do
   manager <- newManager tlsManagerSettings
   res <- runClientM
-    queryFunc
+    (queryFunc apiKey)
     (mkClientEnv manager (BaseUrl Https "api-v3.mbta.com" 443 ""))
   return res
 
@@ -73,7 +72,7 @@ data TripInfo = TripInfo {
 entitiesFromResponse :: APIResponse (Entity a) -> [Entity a]
 entitiesFromResponse APIResponse{ payload = es } = es
 
-attributesByID :: [Entity a] -> Text -> Maybe a
+attributesByID :: [Entity a] -> T.Text -> Maybe a
 attributesByID [] _ = Nothing
 attributesByID (Entity{ id = entityID, attributes = attr }:es) id =
   if entityID == id then Just attr
