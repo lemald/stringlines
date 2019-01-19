@@ -56,8 +56,7 @@ runner = do
            Left e -> throwError
                      ("Couldn't parse configuration file: " ++ e)
            Right c -> return c
-  -- Further validation of config (mainly around shape IDs) and
-  -- translation to some better inernal structure goes here
+
   let routes = fmap (\c -> route_cfg_id c) (cfg_routes cfg)
   let apiKey = cfg_api_key cfg
   routeShapes <- mapM (\r -> do
@@ -71,6 +70,9 @@ runner = do
                             Right res -> return res
                           return (r, entitiesFromResponse apiResponse))
                  routes
+
+  -- Further validation of config (mainly around shape IDs) and
+  -- translation to some better inernal structure goes here
 
   liftIO $ do
     runThreads cfg

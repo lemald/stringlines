@@ -15,8 +15,7 @@ dropFieldOptions n = defaultOptions { fieldLabelModifier = drop n }
 
 data RouteCfg = RouteCfg {
   route_cfg_id :: TAPI.RouteID
-  ,route_cfg_dir0_shape_id :: Maybe TAPI.ShapeID
-  ,route_cfg_dir1_shape_id :: Maybe TAPI.ShapeID
+  ,route_cfg_shape_ids :: Maybe [TAPI.ShapeID]
   } deriving (Generic, Show)
 
 instance FromJSON RouteCfg where
