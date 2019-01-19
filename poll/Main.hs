@@ -39,7 +39,7 @@ main :: IO ()
 main = do
   h <- do
     nh <- streamHandler stderr DEBUG
-    return $ setFormatter nh (simpleLogFormatter "[$time $prio] $msg\n")
+    return $ setFormatter nh (simpleLogFormatter "[$time $prio] $msg")
   updateGlobalLogger rootLoggerName ((setHandlers [h]) .
                                      (System.Log.Logger.setLevel INFO))
   r <- runExceptT runner
@@ -59,20 +59,24 @@ runner = do
   -- Further validation of config (mainly around shape IDs) and
   -- translation to some better inernal structure goes here
 
+  liftIO $ runThreads cfg
+
+  liftIO $ infoM "stringlines.poll" "All child threads exited, shutting down."
+
+runThreads :: Config -> IO()
+runThreads cfg = do
   con <- liftIO $ connectToDB
   liftIO $ createTables con
 
-  mvars <- liftIO $ mapM (\r -> do
-                             mvar <- newEmptyMVar
-                             thread <- forkFinally
-                               (initiateRouteLoop r con (cfg_api_key cfg))
-                               (putMVar mvar)
-                             return mvar)
+  mvars <- mapM (\r -> do
+                    mvar <- newEmptyMVar
+                    thread <- forkFinally
+                      (initiateRouteLoop r con (cfg_api_key cfg))
+                      (putMVar mvar)
+                    return mvar)
            routes
-  liftIO $ mapM_ (\m -> takeMVar m) mvars
-
-  liftIO $ infoM "stringlines.poll" "All child threads exited, shutting down."
-  liftIO $ closeDBCon con
+  mapM_ (\m -> takeMVar m) mvars
+  closeDBCon con
 
 initiateRouteLoop :: RouteConf -> Connection -> T.Text -> IO()
 initiateRouteLoop rc con apiKey = do
