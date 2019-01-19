@@ -28,11 +28,11 @@ instance Accept TJSON where
                   /: ("charset", "utf-8")
 
 type TAPI = "vehicles"
-            :> QueryParam "api-key" Text
+            :> QueryParam "api_key" Text
             :> QueryParam "filter[route]" RouteID
             :> Get '[TJSON] (APIResponse (Entity Vehicle))
             :<|> "shapes"
-            :> QueryParam "api-key" Text
+            :> QueryParam "api_key" Text
             :> QueryParam "filter[route]" RouteID
             :> Get '[TJSON] (APIResponse (Entity Shape))
 
