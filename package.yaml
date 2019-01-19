@@ -33,6 +33,7 @@ dependencies:
 - gpolyline
 - jord
 - sqlite-simple
+- mtl
 
 library:
   source-dirs: src

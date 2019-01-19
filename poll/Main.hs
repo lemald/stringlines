@@ -6,6 +6,7 @@ import Control.Concurrent
 import Control.Concurrent.MVar
 import qualified Control.Exception as Ex
 import Control.Monad
+import Control.Monad.Except
 import Data.Either
 import qualified Data.Text as T
 import Database.SQLite.Simple
@@ -41,30 +42,35 @@ main = do
     return $ setFormatter nh (simpleLogFormatter "[$time $prio] $msg\n")
   updateGlobalLogger rootLoggerName ((setHandlers [h]) .
                                      (System.Log.Logger.setLevel INFO))
+  r <- runExceptT runner
+  case r of
+    Left e -> do
+      errorM "stringlines.poll" e
+      exitWith $ ExitFailure 1
+    Right () -> return ()
 
-  confRes <- readConfig "config.yaml"
-  if isLeft confRes
-    then do
-    errorM
-      "stringlines.poll"
-      ("Couldn't parse configuration file: " ++ (fromLeft "" confRes))
-    exitWith $ ExitFailure 1
-    else return ()
+runner :: ExceptT String IO ()
+runner = do
+  confRes <- liftIO $ readConfig "config.yaml"
+  cfg <- case confRes of
+           Left e -> throwError
+                     ("Couldn't parse configuration file: " ++ e)
+           Right c -> return c
 
-  con <- connectToDB
-  createTables con
+  con <- liftIO $ connectToDB
+  liftIO $ createTables con
 
-  mvars <- mapM (\r -> do
-                    mvar <- newEmptyMVar
-                    thread <- forkFinally
-                      (initiateRouteLoop r con)
-                      (putMVar mvar)
-                    return mvar)
+  mvars <- liftIO $ mapM (\r -> do
+                             mvar <- newEmptyMVar
+                             thread <- forkFinally
+                               (initiateRouteLoop r con)
+                               (putMVar mvar)
+                             return mvar)
            routes
-  mapM_ (\m -> takeMVar m) mvars
+  liftIO $ mapM_ (\m -> takeMVar m) mvars
 
-  infoM "stringlines.poll" "All child threads exited, shutting down."
-  closeDBCon con
+  liftIO $ infoM "stringlines.poll" "All child threads exited, shutting down."
+  liftIO $ closeDBCon con
 
 initiateRouteLoop :: RouteConf -> Connection -> IO()
 initiateRouteLoop rc con = do
