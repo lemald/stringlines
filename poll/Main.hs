@@ -65,8 +65,8 @@ runner = do
 
 runThreads :: Config -> IO()
 runThreads cfg = do
-  con <- liftIO $ connectToDB
-  liftIO $ createTables con
+  con <- connectToDB
+  createTables con
 
   mvars <- mapM (\r -> do
                     mvar <- newEmptyMVar
