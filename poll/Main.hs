@@ -58,6 +58,19 @@ runner = do
            Right c -> return c
   -- Further validation of config (mainly around shape IDs) and
   -- translation to some better inernal structure goes here
+  let routes = fmap (\c -> route_cfg_id c) (cfg_routes cfg)
+  let apiKey = cfg_api_key cfg
+  routeShapes <- mapM (\r -> do
+                          shapeResponse <- liftIO $
+                                           queryAPI apiKey $
+                                           getShapes r
+                          apiResponse <- case shapeResponse of
+                            Left e -> throwError
+                              ("Error fetching shape data from API for route " ++
+                               T.unpack r ++ ": " ++ show e)
+                            Right res -> return res
+                          return (r, entitiesFromResponse apiResponse))
+                 routes
 
   liftIO $ do
     runThreads cfg
