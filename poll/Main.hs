@@ -52,10 +52,7 @@ main = do
 runner :: ExceptT String IO ()
 runner = do
   confRes <- liftIO $ readConfig "config.yaml"
-  cfg <- case confRes of
-           Left e -> throwError
-                     ("Couldn't parse configuration file: " ++ e)
-           Right c -> return c
+  cfg <- liftEither confRes
 
   routes <- mapM (\rc ->
                     if maybe False (\x -> length x > 2) (route_cfg_shape_ids rc)

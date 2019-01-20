@@ -33,5 +33,7 @@ readConfig :: FilePath -> IO(Either String Config)
 readConfig fp = do
   decodeRes <- decodeFileEither fp
   return $ case decodeRes of
-             Left pe -> Left $ prettyPrintParseException pe
+             Left pe -> Left $
+               "Couldn't parse configuration file: " ++
+               prettyPrintParseException pe
              Right c -> Right c
