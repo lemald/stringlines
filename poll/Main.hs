@@ -22,18 +22,20 @@ import Config
 import DataStore
 import TAPI
 
-data RouteConf = RouteConf RouteID ShapeID
+data RouteConf = SingleShapeConf RouteID TAPI.Shape |
+                 TwoShapeConf RouteID TAPI.Shape TAPI.Shape
 
 routeConfRoute :: RouteConf -> RouteID
-routeConfRoute (RouteConf r _) = r
+routeConfRoute (SingleShapeConf r _) = r
+routeConfRoute (TwoShapeConf r _ _) = r
 
-routeConfShapeID :: RouteConf -> ShapeID
-routeConfShapeID (RouteConf _ s) = s
-
-routes :: [RouteConf]
-routes = [
-  RouteConf "77" "770105"
-  ]
+-- DirectionID should perhaps be rewritten to have just two
+-- constructors so that this is a complete enumeration of the
+-- possibilities
+routeConfShape :: RouteConf -> DirectionID -> Shape
+routeConfShape (SingleShapeConf _ s) _ = s
+routeConfShape (TwoShapeConf _ s _) 0 = s
+routeConfShape (TwoShapeConf _ _ s) 1 = s
 
 main :: IO ()
 main = do
@@ -76,23 +78,31 @@ runner = do
 
   -- Further validation of config (mainly around shape IDs) and
   -- translation to some better inernal structure goes here
+  routeConfs <- mapM liftEither $ fmap (createRouteConf cfg) routeShapes
 
   liftIO $ do
-    runThreads cfg
+    runThreads (cfg_api_key cfg) routeConfs
     infoM "stringlines.poll" "All child threads exited, shutting down."
 
-runThreads :: Config -> IO()
-runThreads cfg = do
+-- This and the RouteConf stuff should probably eventually move to
+-- Config.hs
+createRouteConf :: Config ->
+                   (RouteID, [TAPI.Entity TAPI.Shape]) ->
+                   Either String RouteConf
+createRouteConf cfg shapeEntities = undefined
+
+runThreads :: T.Text -> [RouteConf] -> IO()
+runThreads apiKey routeConfs = do
   con <- connectToDB
   createTables con
 
   mvars <- mapM (\r -> do
                     mvar <- newEmptyMVar
                     thread <- forkFinally
-                      (initiateRouteLoop r con (cfg_api_key cfg))
+                      (initiateRouteLoop r con apiKey)
                       (putMVar mvar)
                     return mvar)
-           routes
+           routeConfs
   mapM_ (\m -> takeMVar m) mvars
   closeDBCon con
 
@@ -105,6 +115,7 @@ initiateRouteLoop rc con apiKey = do
     (Right apires) -> let shapeEntities = entitiesFromResponse apires
                       in routeLoop apiKey rc shapeEntities con
 
+-- TODO: This can probably be refactored using ExceptT
 routeLoop :: T.Text -> RouteConf -> [Entity Shape] -> Connection -> IO()
 routeLoop apiKey rc shapeEntities con = do
   res <- queryAPI apiKey $ getVehicles (routeConfRoute rc)
@@ -114,9 +125,8 @@ routeLoop apiKey rc shapeEntities con = do
                   ("Error fetching vehicle data from API: "
                    ++ show err)
     (Right apires) -> do
-      sql_res <- Ex.try (let s = attributesByID shapeEntities
-                                 $ routeConfShapeID rc
-                             tripInfo = tripInfoFromResponse apires s
+      sql_res <- Ex.try (let s = routeConfShape rc 0 -- TODO: Get actual direction ID
+                             tripInfo = tripInfoFromResponse apires (Just s)
                          in do infoM
                                  "stringlines.poll"
                                  ("Fetched "
