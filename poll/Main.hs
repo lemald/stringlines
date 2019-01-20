@@ -57,15 +57,13 @@ runner = do
                      ("Couldn't parse configuration file: " ++ e)
            Right c -> return c
 
-  let routes = fmap (\c -> route_cfg_id c) (cfg_routes cfg)
-
-  mapM (\rc ->
-          if length (route_cfg_shape_ids rc) > 2
-          then throwError ("More than 2 shape IDs specified for route " ++
-                           (T.unpack $ route_cfg_id rc))
-          else return ()
-       )
-    (cfg_routes cfg)
+  routes <- mapM (\rc ->
+                    if maybe False (\x -> length x > 2) (route_cfg_shape_ids rc)
+                    then throwError ("More than 2 shape IDs specified for route " ++
+                                     (T.unpack $ route_cfg_id rc))
+                    else return (route_cfg_id rc)
+                 )
+            (cfg_routes cfg)
 
   routeShapes <- mapM (\r -> do
                           shapeResponse <- liftIO $
