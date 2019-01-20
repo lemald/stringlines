@@ -89,7 +89,7 @@ runner = do
 createRouteConf :: Config ->
                    (RouteID, [TAPI.Entity TAPI.Shape]) ->
                    Either String RouteConf
-createRouteConf cfg shapeEntities = undefined
+createRouteConf cfg (routeID, shapeEntities) = undefined
 
 runThreads :: T.Text -> [RouteConf] -> IO()
 runThreads apiKey routeConfs = do
