@@ -91,7 +91,6 @@ initiateRouteLoop rc con apiKey = do
     (Right apires) -> let shapeEntities = api_response_data apires
                       in routeLoop apiKey rc shapeEntities con
 
--- TODO: This can probably be refactored using ExceptT
 routeLoop :: T.Text -> RouteConf -> [Entity Shape] -> Connection -> IO()
 routeLoop apiKey rc shapeEntities con = do
   res <- queryAPI apiKey $ getVehicles (routeConfRoute rc)

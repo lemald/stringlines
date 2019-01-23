@@ -111,7 +111,6 @@ makeChartFromParams p = do
     ,YLabel "Progress along route"
     ,YRange (0, 1)
     ,Grid $ Just ["xtics", "ytics"]
-    -- TODO: Output file should also come from args
     ,terminal $ Graphics.Gnuplot.Terminal.PNG.cons $ paramOutFile p
     ,Custom "terminal png size 15360,640" []
     ]
