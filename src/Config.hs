@@ -16,6 +16,7 @@ import TAPI
 data RouteConf = NoShapeConf RouteID |
                  SingleShapeConf RouteID TAPI.Shape |
                  TwoShapeConf RouteID TAPI.Shape TAPI.Shape
+               deriving (Show, Eq)
 
 routeConfRoute :: RouteConf -> RouteID
 routeConfRoute (SingleShapeConf r _) = r

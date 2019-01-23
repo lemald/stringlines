@@ -82,7 +82,7 @@ data Shape = Shape {
   polyline :: Text,
   name :: Text,
   direction_id :: Int
-} deriving (Generic, Show)
+} deriving (Generic, Show, Eq)
 
 -- This is necessary due to "data" being a keyword in Haskell
 instance FromJSON a => FromJSON (APIResponse a) where
