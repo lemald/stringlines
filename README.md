@@ -48,3 +48,4 @@ A whole bunch of things. Here are some of the more important items:
   fields in the API and probably clean up some code as a result.
 - Include `vehicle_id` in `TripInfo`, maybe using it for coloring
   stuff on charts.
+- Clean up the `module Blah (...) where` statements some more
