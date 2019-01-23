@@ -1,7 +1,27 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DeriveGeneric #-}
 
-module Config where
+module Config (
+  routeConfRoute
+  ,routeConfShape
+  ,RouteConf(
+      NoShapeConf
+      ,SingleShapeConf
+      ,TwoShapeConf
+      )
+  ,Config(
+      cfg_api_key
+      ,cfg_routes
+      ,Config
+      )
+  ,RouteCfg(
+      route_cfg_id
+      ,route_cfg_shape_ids
+      ,RouteCfg
+      )
+  ,createRouteConf
+  ,readConfig
+  ) where
 
 import Control.Monad.Except
 import Data.Aeson.Types
@@ -10,7 +30,6 @@ import Data.Yaml
 import qualified Data.Text as T
 import GHC.Generics
 
-import Client
 import TAPI
 
 data RouteConf = NoShapeConf RouteID |
@@ -25,10 +44,11 @@ routeConfRoute (TwoShapeConf r _ _) = r
 -- DirectionID should perhaps be rewritten to have just two
 -- constructors so that this is a complete enumeration of the
 -- possibilities
-routeConfShape :: RouteConf -> DirectionID -> Shape
-routeConfShape (SingleShapeConf _ s) _ = s
-routeConfShape (TwoShapeConf _ s _) 0 = s
-routeConfShape (TwoShapeConf _ _ s) 1 = s
+routeConfShape :: RouteConf -> DirectionID -> Maybe Shape
+routeConfShape (NoShapeConf _) _ = Nothing
+routeConfShape (SingleShapeConf _ s) _ = Just s
+routeConfShape (TwoShapeConf _ s _) 0 = Just s
+routeConfShape (TwoShapeConf _ _ s) 1 = Just s
 
 dropFieldOptions :: Int -> Options
 dropFieldOptions n = defaultOptions { fieldLabelModifier = drop n }

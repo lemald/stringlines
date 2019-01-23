@@ -58,7 +58,7 @@ runner = do
                               ("Error fetching shape data from API for route " ++
                                T.unpack r ++ ": " ++ show e)
                             Right res -> return res
-                          return (r, entitiesFromResponse apiResponse))
+                          return (r, api_response_data apiResponse))
                  routes
 
   routeConfs <- mapM (createRouteConf cfg) routeShapes
@@ -88,7 +88,7 @@ initiateRouteLoop rc con apiKey = do
   case shapeResponse of
     (Left err) -> errorM "stringlines.poll" ("Error fetching shape data from API: "
                                               ++ show err)
-    (Right apires) -> let shapeEntities = entitiesFromResponse apires
+    (Right apires) -> let shapeEntities = api_response_data apires
                       in routeLoop apiKey rc shapeEntities con
 
 -- TODO: This can probably be refactored using ExceptT
@@ -101,8 +101,7 @@ routeLoop apiKey rc shapeEntities con = do
                   ("Error fetching vehicle data from API: "
                    ++ show err)
     (Right apires) -> do
-      sql_res <- Ex.try (let s = routeConfShape rc 0 -- TODO: Get actual direction ID
-                             tripInfo = tripInfoFromResponse apires (Just s)
+      sql_res <- Ex.try (let tripInfo = tripInfoFromResponse apires rc
                          in do infoM
                                  "stringlines.poll"
                                  ("Fetched "

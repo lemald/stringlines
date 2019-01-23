@@ -6,7 +6,6 @@ module Progress (
   ,closestPointAlongRoute
   ) where
 
-import TAPI
 import Data.Geo.Jord.Geodetics
 import Data.Geo.Jord.LatLong
 import Data.Geo.Jord.Length
@@ -14,6 +13,8 @@ import Data.Geo.Jord.Quantity
 import Data.List
 import Data.Text as T
 import GPolyline
+
+import TAPI
 
 progressOnRoute :: Double -> Double -> Shape -> Maybe Double
 progressOnRoute vehicleLat vehicleLong shape = let
@@ -50,13 +51,13 @@ invertProgress p s = case shapeDirectionID s of
   0 -> p
   1 -> 1 - p
 
-shapeToPoints :: Shape -> [LatLong]
+shapeToPoints :: TAPI.Shape -> [LatLong]
 shapeToPoints s = let
   line = decodeline (T.unpack $ polyline s)
   in fmap (\(lat, lon) -> decimalLatLong lat lon) line
 
-shapeDirectionID :: Shape -> TAPI.DirectionID
-shapeDirectionID Shape{ direction_id = d } = d
+shapeDirectionID :: TAPI.Shape -> TAPI.DirectionID
+shapeDirectionID TAPI.Shape{ direction_id = d } = d
 
 closestPointAlongRoute :: LatLong -> [LatLong] -> Maybe LatLong
 closestPointAlongRoute pos ps = let

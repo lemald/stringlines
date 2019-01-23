@@ -7,7 +7,6 @@ module Client (
   ,queryAPI
   ,tripInfoFromResponse
   ,tripInfoFromVehicle
-  ,entitiesFromResponse
   ,attributesByID
   ,TripInfo(trip_id
            ,route_id
@@ -27,6 +26,7 @@ import Network.HTTP.Client.TLS
 import Servant.Client
 import Servant.API
 
+import Config
 import TAPI
 import Progress
 
@@ -69,26 +69,17 @@ data TripInfo = TripInfo {
   timestamp :: UTCTime
 } deriving (Show, Eq)
 
-entitiesFromResponse :: APIResponse (Entity a) -> [Entity a]
-entitiesFromResponse APIResponse{ payload = es } = es
-
-attributesByID :: [Entity a] -> T.Text -> Maybe a
-attributesByID [] _ = Nothing
-attributesByID (Entity{ id = entityID, attributes = attr }:es) id =
-  if entityID == id then Just attr
-  else attributesByID es id
-
 tripInfoFromResponse :: APIResponse (Entity Vehicle) ->
-                        Maybe Shape ->
+                        RouteConf ->
                         [TripInfo]
-tripInfoFromResponse res s = do
-  ts <- (fmap (tripInfoFromVehicle s) $ entitiesFromResponse res)
+tripInfoFromResponse res cfg = do
+  ts <- (fmap (tripInfoFromVehicle cfg) $ api_response_data res)
   case ts of
     Nothing -> []
     Just a -> [a]
 
-tripInfoFromVehicle :: Maybe Shape -> Entity Vehicle -> Maybe TripInfo
-tripInfoFromVehicle s Entity{
+tripInfoFromVehicle :: RouteConf -> Entity Vehicle -> Maybe TripInfo
+tripInfoFromVehicle cfg Entity{
   attributes = Vehicle{
       direction_id = direction_id
       ,latitude = lat
@@ -113,7 +104,7 @@ tripInfoFromVehicle s Entity{
   ,direction_id = direction_id
   ,latitude = lat
   ,longitude = lon
-  ,progress = case s of
+  ,progress = case routeConfShape cfg direction_id of
       Just shape -> progressOnRoute lat lon shape
       Nothing -> Nothing
   ,timestamp = ts

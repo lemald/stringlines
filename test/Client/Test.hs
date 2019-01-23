@@ -8,19 +8,18 @@ import Data.Time.Clock
 import Test.Tasty
 import Test.Tasty.HUnit
 
+import Config
 import Client
 import TAPI
 
 clientTests :: TestTree
 clientTests = testGroup "Client"
-  [testCase "entitiesFromResponse" $
-    entitiesFromResponse apiResponse @?= [goodVehicleEntity, badVehicleEntity]
-  ,testCase "tripInfoFromVehicle in good case" $
-    tripInfoFromVehicle Nothing goodVehicleEntity @?= Just goodVehicleTripInfo
+  [testCase "tripInfoFromVehicle in good case" $
+    tripInfoFromVehicle (NoShapeConf "77") goodVehicleEntity @?= Just goodVehicleTripInfo
   ,testCase "tripInfoFromVehicle in bad case" $
-    tripInfoFromVehicle Nothing badVehicleEntity @?= Nothing
+    tripInfoFromVehicle (NoShapeConf "77") badVehicleEntity @?= Nothing
   ,testCase "tripInfoFromResponse" $
-    tripInfoFromResponse apiResponse Nothing @?= [goodVehicleTripInfo]
+    tripInfoFromResponse apiResponse (NoShapeConf "77") @?= [goodVehicleTripInfo]
   ]
 
 time :: UTCTime
@@ -88,7 +87,7 @@ badVehicleEntity = Entity{
 
 apiResponse :: APIResponse (Entity Vehicle)
 apiResponse = APIResponse{
-  payload = [goodVehicleEntity, badVehicleEntity]
+  api_response_data = [goodVehicleEntity, badVehicleEntity]
   }
 
 goodVehicleTripInfo :: TripInfo
