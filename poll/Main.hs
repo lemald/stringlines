@@ -22,21 +22,6 @@ import Config
 import DataStore
 import TAPI
 
-data RouteConf = SingleShapeConf RouteID TAPI.Shape |
-                 TwoShapeConf RouteID TAPI.Shape TAPI.Shape
-
-routeConfRoute :: RouteConf -> RouteID
-routeConfRoute (SingleShapeConf r _) = r
-routeConfRoute (TwoShapeConf r _ _) = r
-
--- DirectionID should perhaps be rewritten to have just two
--- constructors so that this is a complete enumeration of the
--- possibilities
-routeConfShape :: RouteConf -> DirectionID -> Shape
-routeConfShape (SingleShapeConf _ s) _ = s
-routeConfShape (TwoShapeConf _ s _) 0 = s
-routeConfShape (TwoShapeConf _ _ s) 1 = s
-
 main :: IO ()
 main = do
   h <- do
@@ -76,20 +61,11 @@ runner = do
                           return (r, entitiesFromResponse apiResponse))
                  routes
 
-  -- Further validation of config (mainly around shape IDs) and
-  -- translation to some better inernal structure goes here
-  routeConfs <- mapM liftEither $ fmap (createRouteConf cfg) routeShapes
+  routeConfs <- mapM (createRouteConf cfg) routeShapes
 
   liftIO $ do
     runThreads (cfg_api_key cfg) routeConfs
-    infoM "stringlines.poll" "All child threads exited, shutting down."
-
--- This and the RouteConf stuff should probably eventually move to
--- Config.hs
-createRouteConf :: Config ->
-                   (RouteID, [TAPI.Entity TAPI.Shape]) ->
-                   Either String RouteConf
-createRouteConf cfg (routeID, shapeEntities) = undefined
+    infoM "stringlines.poll" "All child threads exited, shutting down."    
 
 runThreads :: T.Text -> [RouteConf] -> IO()
 runThreads apiKey routeConfs = do
