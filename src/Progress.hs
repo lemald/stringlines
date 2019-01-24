@@ -77,20 +77,3 @@ closestPointAlongRoute' pos (closest, closestDist) nextPoint =
             Just a -> if toMetres dist < toMetres a
                       then (Just nextPoint, Just dist)
                       else (closest, closestDist)
-
--- I'm not sure this will actually be necessary, but now that I've got
--- all of the logic right I don't want to throw it away without
--- committing it for future reference.
-pointsToArcs :: [LatLong] -> [GreatArc]
-pointsToArcs ps = let
-  (as, _) = Data.List.foldl' pointsToArcs' ([], Nothing) ps
-  in as
-
-pointsToArcs' :: ([GreatArc], Maybe LatLong) ->
-                 LatLong ->
-                 ([GreatArc], Maybe LatLong)
-pointsToArcs' (as, Nothing) point = (as, Just point)
-pointsToArcs' (as, Just prevPoint) newPoint =
-  case greatArcE (prevPoint, newPoint) of
-    Right a -> (as ++ [a], Just newPoint)
-    Left _ -> (as, Just newPoint)
