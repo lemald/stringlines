@@ -8,14 +8,7 @@ module Client (
   ,tripInfoFromResponse
   ,tripInfoFromVehicle
   ,attributesByID
-  ,TripInfo(trip_id
-           ,route_id
-           ,direction_id
-           ,latitude
-           ,longitude
-           ,progress
-           ,timestamp
-           ,TripInfo)
+  ,TripInfo(..)
   ) where
 
 import Data.Proxy
