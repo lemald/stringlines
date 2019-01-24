@@ -86,7 +86,7 @@ data RelationshipPayload a = RelationshipPayload {
 
 data Vehicle = Vehicle {
   current_status :: T.Text,
-  current_stop_sequence :: Int,
+  current_stop_sequence :: Maybe Int,
   speed :: Double,
   direction_id :: DirectionID,
   bearing :: Maybe Int,
