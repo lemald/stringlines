@@ -30,8 +30,6 @@ specify `-r` for a route ID and `-d` for a day.
 A whole bunch of things. Here are some of the more important items:
 
 - Visual improvements to the output.
-- Command line arguments for the polling executable. Routes will
-  probably need to be configured via a config file.
 - Refactor the data gathering to at least make using other data
   sources possible.
 - Update time zone handling to store the original zoned time returned
@@ -42,7 +40,8 @@ A whole bunch of things. Here are some of the more important items:
   using.
 - Do calculation of progress at chart generation rather than polling.
   Refactor calculation of progress to not parse the polyline for every
-  data point.
+  data point. On the other hand, if I do a web front-end, I'll want to
+  keep the approach of calculating progress as I poll.
 - Support charting shared trunks where several routes converge.
 - Use `fieldLabelModifier` to clean up a bunch of duplicate record
   fields in the API and probably clean up some code as a result.
