@@ -28,7 +28,7 @@ time = read "2018-12-01 20:30:00"
 goodVehicle :: Vehicle
 goodVehicle = Vehicle{
   current_status = "foo"
-  ,current_stop_sequence = 7
+  ,current_stop_sequence = Just 7
   ,speed = 10.0
   ,bearing = Just 17
   ,label = "bar"
@@ -60,7 +60,7 @@ goodVehicleEntity = Entity{
 badVehicle :: Vehicle
 badVehicle = Vehicle{
   current_status = "foo"
-  ,current_stop_sequence = 7
+  ,current_stop_sequence = Just 7
   ,speed = 10.0
   ,bearing = Just 17
   ,label = "bar"

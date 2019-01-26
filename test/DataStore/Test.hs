@@ -21,7 +21,7 @@ dataStoreTests = testGroup "DataStore"
   ,testCase "Inserts row" $ testDBConnection >>= testRowInsert >>= close
   ,testCase "Don't insert duplicate data points" $
     testDBConnection >>= testNoDups >>= close
-  ,testCase "tripInfoByRouteforday" $
+  ,testCase "tripInfoByRouteForDay" $
     testDBConnection >>= testTripInfoByRouteForDay >>= close]
 
 testTableCreation :: Connection -> IO(Connection)

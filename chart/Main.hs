@@ -71,13 +71,13 @@ options =
     (ReqArg (\o opts -> opts{ optOutFile = o }) "FILE")
     "output file"
   -- TODO: Make this option actually do something
-  ,Option ['b'] ["database"]
-    (ReqArg (\b opts -> opts{ optDBFile = b }) "FILE")
-    "database file"
-  ,Option [] ["direction0"]
+  -- ,Option ['b'] ["database"]
+  --   (ReqArg (\b opts -> opts{ optDBFile = b }) "FILE")
+  --   "database file"
+  ,Option [] ["direction-0"]
     (NoArg (\opts -> opts{ optDir0 = True }))
     "include direction ID 0"
-  ,Option [] ["direction1"]
+  ,Option [] ["direction-1"]
     (NoArg (\opts -> opts{ optDir1 = True }))
     "include direction ID 1"
   ]

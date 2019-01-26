@@ -4,21 +4,9 @@
 module Config (
   routeConfRoute
   ,routeConfShape
-  ,RouteConf(
-      NoShapeConf
-      ,SingleShapeConf
-      ,TwoShapeConf
-      )
-  ,Config(
-      cfg_api_key
-      ,cfg_routes
-      ,Config
-      )
-  ,RouteCfg(
-      route_cfg_id
-      ,route_cfg_shape_ids
-      ,RouteCfg
-      )
+  ,RouteConf(..)
+  ,Config(..)
+  ,RouteCfg(..)
   ,createRouteConf
   ,readConfig
   ) where

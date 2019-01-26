@@ -7,7 +7,7 @@ import DataStore.Test
 import Progress.Test
 
 main :: IO ()
-main = defaultMain $ testGroup "bus-scrape tests" [
+main = defaultMain $ testGroup "stringlines tests" [
   Client.Test.clientTests
   ,Config.Test.configTests
   ,DataStore.Test.dataStoreTests

@@ -14,48 +14,13 @@ module TAPI (
   ,TripID
   ,ShapeID
   ,DirectionID
-  ,APIResponse(
-      api_response_data
-      ,APIResponse
-      )
-  ,Entity(
-      id
-      ,attributes
-      ,relationships
-      ,Entity
-      )
-  ,Relationships(
-      route
-      ,vehicle
-      ,trip
-      ,Relationships
-      )
-  ,Relationship(
-      payload
-      ,Relationship
-      )
-  ,RelationshipPayload(
-      id
-      ,RelationshipPayload
-      )
-  ,Vehicle(
-      current_status
-      ,current_stop_sequence
-      ,speed
-      ,direction_id
-      ,bearing
-      ,label
-      ,longitude
-      ,latitude
-      ,updated_at
-      ,Vehicle
-      )
-  ,Shape(
-      polyline
-      ,name
-      ,direction_id
-      ,Shape
-      )
+  ,APIResponse(..)
+  ,Entity(..)
+  ,Relationships(..)
+  ,Relationship(..)
+  ,RelationshipPayload(..)
+  ,Vehicle(..)
+  ,Shape(..)
   ,attributesByID
   ) where
 
@@ -121,7 +86,7 @@ data RelationshipPayload a = RelationshipPayload {
 
 data Vehicle = Vehicle {
   current_status :: T.Text,
-  current_stop_sequence :: Int,
+  current_stop_sequence :: Maybe Int,
   speed :: Double,
   direction_id :: DirectionID,
   bearing :: Maybe Int,
