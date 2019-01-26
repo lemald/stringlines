@@ -114,7 +114,7 @@ routeLoop apiKey rc shapeEntities con = do
                   "stringlines.poll"
                   ("Exception raised: "
                    ++ show (e :: Ex.SomeException))
-        Right _ -> return()
+        Right _ -> return ()
            
   threadDelay (15 * 1000 * 1000)
   routeLoop apiKey rc shapeEntities con
