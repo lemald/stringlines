@@ -45,5 +45,3 @@ A whole bunch of things. Here are some of the more important items:
 - Support charting shared trunks where several routes converge.
 - Use `fieldLabelModifier` to clean up a bunch of duplicate record
   fields in the API and probably clean up some code as a result.
-- Include `vehicle_id` in `TripInfo`, maybe using it for coloring
-  stuff on charts.

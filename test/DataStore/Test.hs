@@ -40,7 +40,7 @@ testRowInsert con = do
   insertTripInfo con [tripInfo1]
   tripInfoEntries <- query_
     con
-    "SELECT CAST(trip_id AS TEXT), CAST(route_id AS TEXT), direction_id, latitude, longitude, progress, timestamp FROM location"
+    "SELECT CAST(trip_id AS TEXT), CAST(route_id AS TEXT), direction_id, CAST(vehicle_label AS TEXT), latitude, longitude, progress, timestamp FROM location"
     :: IO([TripInfo])
   length tripInfoEntries @?= 1
   head tripInfoEntries @?= tripInfo1
@@ -53,7 +53,7 @@ testNoDups con = do
   insertTripInfo con [tripInfo2]
   tripInfoEntries <- query_
     con
-    "SELECT CAST(trip_id AS TEXT), CAST(route_id AS TEXT), direction_id, latitude, longitude, progress, timestamp FROM location"
+    "SELECT CAST(trip_id AS TEXT), CAST(route_id AS TEXT), direction_id, CAST(vehicle_label AS TEXT), latitude, longitude, progress, timestamp FROM location"
     :: IO([TripInfo])
   length tripInfoEntries @?= 1
   head tripInfoEntries @?= tripInfo1
@@ -78,6 +78,7 @@ tripInfo1 = TripInfo{
   trip_id = "123",
   route_id = "39",
   direction_id = 0,
+  vehicle_label = "1234",
   latitude = 1.0,
   longitude = 2.0,
   progress = Just 0.5,
@@ -89,6 +90,7 @@ tripInfo2 = TripInfo{
   trip_id = "123",
   route_id = "39",
   direction_id = 0,
+  vehicle_label = "1234",
   latitude = 3.0,
   longitude = 4.0,
   progress = Just 0.5,
@@ -100,6 +102,7 @@ tripInfo3 = TripInfo{
   trip_id = "123",
   route_id = "39",
   direction_id = 0,
+  vehicle_label = "1234",
   latitude = 3.0,
   longitude = 4.0,
   progress = Just 0.5,
@@ -111,6 +114,7 @@ tripInfo4 = TripInfo{
   trip_id = "123",
   route_id = "77",
   direction_id = 0,
+  vehicle_label = "1234",
   latitude = 3.0,
   longitude = 4.0,
   progress = Just 0.5,
@@ -122,6 +126,7 @@ tripInfo5 = TripInfo{
   trip_id = "123",
   route_id = "39",
   direction_id = 1,
+  vehicle_label = "1234",
   latitude = 1.0,
   longitude = 2.0,
   progress = Just 0.5,

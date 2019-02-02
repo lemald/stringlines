@@ -53,13 +53,14 @@ queryAPI apiKey queryFunc = do
   return res
 
 data TripInfo = TripInfo {
-  trip_id :: TripID,
-  route_id :: RouteID,
-  direction_id :: DirectionID,
-  latitude :: Double,
-  longitude :: Double,
-  progress :: Maybe Double,
-  timestamp :: UTCTime
+  trip_id :: TripID
+  ,route_id :: RouteID
+  ,direction_id :: DirectionID
+  ,vehicle_label :: T.Text
+  ,latitude :: Double
+  ,longitude :: Double
+  ,progress :: Maybe Double
+  ,timestamp :: UTCTime
 } deriving (Show, Eq)
 
 tripInfoFromResponse :: APIResponse (Entity Vehicle) ->
@@ -77,6 +78,7 @@ tripInfoFromVehicle cfg Entity{
       direction_id = direction_id
       ,latitude = lat
       ,longitude = lon
+      ,label = label
       ,updated_at = ts
       }
   ,relationships = Relationships{
@@ -95,6 +97,7 @@ tripInfoFromVehicle cfg Entity{
   trip_id = trip_id
   ,route_id = route_id
   ,direction_id = direction_id
+  ,vehicle_label = label
   ,latitude = lat
   ,longitude = lon
   ,progress = case routeConfShape cfg direction_id of
