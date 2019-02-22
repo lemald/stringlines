@@ -23,7 +23,8 @@ routes:
   - id: "1"
     shape_ids:
       - "010058"
-      - "010070" ```
+      - "010070"
+```
 	  
 Each route needs zero, one, or two shape IDs to use for comparing the
 present position of vehicles against for the purpose of calculating
