@@ -14,16 +14,35 @@ and uses Gnuplot to produce the final output.
 
 ### Polling
 
-Parameters for polling are currently stored in the source in
-`app/Main.hs`. These will be moved to command line arguments soon. To
-run the polling executable, just do `stack run stringlines-poll`.
+Parameters for the polling script live in a `config.yaml` file. As an
+example, one might have:
+
+```yaml
+api_key: "***REMOVED***"
+routes:
+  - id: "1"
+    shape_ids:
+      - "010058"
+      - "010070" ```
+	  
+Each route needs zero, one, or two shape IDs to use for comparing the
+present position of vehicles against for the purpose of calculating
+progress. If no shape IDs are specified, no calculation is done. If
+two are specified, the shape to use will be chosen intelligently based
+on which one matches the direction the vehicle is traveling. To run
+the polling executable, just do `stack run stringlines-poll`.
 
 ### Chart generation
 
 This step can be run with `stack run stringlines-chart` followed by a
 `--` and the rest of the command line arguments. These are mostly
 self-documented in the usage message - note that you'll need to
-specify `-r` for a route ID and `-d` for a day.
+specify `-r` for a route ID and `-d` for a day. Additionally, you can
+choose `--direction-0` or `--direction-1` to plot vehicles traveling
+in only one direction - this is most useful for when differences
+between the routing in the inbound and outbound directions require
+using two shapes and the progress in the two directions is therefore
+not directly comparable.
 
 ## TODO
 
