@@ -10,6 +10,9 @@ the backend is the MBTA's
 stored in a simple SQLite databse. A second program queries this data
 and uses Gnuplot to produce the final output.
 
+Please note that this is a purely personal project despite the fact
+that I am affiliated with the MBTA as of this writing.
+
 ## Usage
 
 ### Polling
