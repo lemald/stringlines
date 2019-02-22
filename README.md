@@ -21,7 +21,7 @@ Parameters for the polling script live in a `config.yaml` file. As an
 example, one might have:
 
 ```yaml
-api_key: "***REMOVED***"
+api_key: "your API key here"
 routes:
   - id: "1"
     shape_ids:
