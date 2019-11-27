@@ -17,7 +17,7 @@
 #
 # resolver: ./custom-snapshot.yaml
 # resolver: https://example.com/snapshots/2018-01-01.yaml
-resolver: lts-12.25
+resolver: lts-14.16
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
@@ -38,7 +38,7 @@ packages:
 # using the same syntax as the packages field.
 # (e.g., acme-missiles-0.3)
 extra-deps:
-- jord-0.5.0.0@sha256:0f0a8228f19e08d0f16284da915bbf1077f5f08403c1e7febd376c53a7695102
+- jord-0.6.0.0
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

@@ -44,7 +44,7 @@ getShapes route k = shapes (Just k) (Just route)
 
 queryAPI :: T.Text ->
             (T.Text -> ClientM (APIResponse a)) ->
-            IO (Either ServantError (APIResponse a))
+            IO (Either ClientError (APIResponse a))
 queryAPI apiKey queryFunc = do
   manager <- newManager tlsManagerSettings
   res <- runClientM
