@@ -47,10 +47,9 @@ queryAPI :: T.Text ->
             IO (Either ClientError (APIResponse a))
 queryAPI apiKey queryFunc = do
   manager <- newManager tlsManagerSettings
-  res <- runClientM
+  runClientM
     (queryFunc apiKey)
     (mkClientEnv manager (BaseUrl Https "api-v3.mbta.com" 443 ""))
-  return res
 
 data TripInfo = TripInfo {
   trip_id :: TripID
@@ -68,7 +67,7 @@ tripInfoFromResponse :: APIResponse (Entity Vehicle) ->
                         RouteConf ->
                         [TripInfo]
 tripInfoFromResponse res cfg = do
-  ts <- (fmap (tripInfoFromVehicle cfg) $ api_response_data res)
+  ts <- tripInfoFromVehicle cfg <$> api_response_data res
   case ts of
     Nothing -> []
     Just a -> [a]
