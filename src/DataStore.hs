@@ -48,15 +48,17 @@ instance (ToField a, ToField b, ToField c, ToField d, ToField e, ToField f,
     [toField a, toField b, toField c, toField d, toField e, toField f,
      toField g, toField h, toField i, toField j, toField k]
 
-connectToDB :: IO(Connection)
+connectToDB :: IO Connection
 connectToDB = open "locations.db"
 
 closeDBCon :: Connection -> IO()
-closeDBCon con = close con
+closeDBCon = close
 
 createTables :: Connection -> IO()
 createTables con = do
-  execute_ con "CREATE TABLE IF NOT EXISTS location (trip_id STR, route_id STR, direction_id INTEGER, vehicle_label STR, vehicle_id STR, latitude REAL, longitude REAL, progress REAL, timestamp STR)"
+  execute_ con "CREATE TABLE IF NOT EXISTS location (trip_id STR, route_id STR,\
+               \direction_id INTEGER, vehicle_label STR, vehicle_id STR,\
+               \latitude REAL, longitude REAL, progress REAL, timestamp STR)"
   execute_ con "CREATE INDEX IF NOT EXISTS location_trip_id ON location (trip_id)"
   execute_ con "CREATE INDEX IF NOT EXISTS location_route_id ON location (route_id)"
   execute_ con "CREATE INDEX IF NOT EXISTS location_timestamp ON location (DATETIME(timestamp))"
@@ -65,7 +67,9 @@ insertTripInfo :: Connection -> [TripInfo] -> IO()
 insertTripInfo con ts =
   executeMany
   con
-  "INSERT INTO location (trip_id, route_id, direction_id, vehicle_label, vehicle_id, latitude, longitude, progress, timestamp) SELECT ?,?,?,?,?,?,?,?,? WHERE NOT EXISTS (SELECT 1 FROM location WHERE trip_id = ? AND timestamp = ?)"
+  "INSERT INTO location (trip_id, route_id, direction_id, vehicle_label, vehicle_id,\
+  \latitude, longitude, progress, timestamp) SELECT ?,?,?,?,?,?,?,?,?\
+  \WHERE NOT EXISTS (SELECT 1 FROM location WHERE trip_id = ? AND timestamp = ?)"
   (fmap insertTripInfoQueryArgs ts)
 
 insertTripInfoQueryArgs :: TripInfo ->
@@ -91,7 +95,7 @@ tripInfoByRouteForDay :: Connection ->
                          [TAPI.DirectionID] ->
                          Day ->
                          TimeZone ->
-                         IO([TripInfo])
+                         IO [TripInfo]
 tripInfoByRouteForDay con routeID dirs day tz =
   let
     startTime = LocalTime{
@@ -114,8 +118,13 @@ tripInfoByRouteForDay con routeID dirs day tz =
     results <- mapM
                (\d -> query
                  con
-                 "SELECT CAST(trip_id AS TEXT), CAST(route_id AS TEXT), direction_id, CAST(vehicle_label AS TEXT), CAST(vehicle_id AS TEXT), latitude, longitude, progress, timestamp FROM location WHERE route_id = ? AND direction_id = ? AND DATETIME(timestamp) > DATETIME(?) AND DATETIME(timestamp) < DATETIME(?) ORDER BY DATETIME(timestamp)"
+                 "SELECT CAST(trip_id AS TEXT), CAST(route_id AS TEXT), direction_id,\
+                 \CAST(vehicle_label AS TEXT), CAST(vehicle_id AS TEXT), latitude, longitude,\
+                 \progress, timestamp \
+                 \FROM location \
+                 \WHERE route_id = ? AND direction_id = ? AND DATETIME(timestamp) > DATETIME(?) \
+                 \AND DATETIME(timestamp) < DATETIME(?) ORDER BY DATETIME(timestamp)"
                  (routeID, d, localTimeToUTC tz startTime, localTimeToUTC tz endTime))
                dirs
     return $ concat results
-  
+
