@@ -57,6 +57,7 @@ data TripInfo = TripInfo {
   ,route_id :: RouteID
   ,direction_id :: DirectionID
   ,vehicle_label :: T.Text
+  ,vehicle_id :: TAPI.VehicleID
   ,latitude :: Double
   ,longitude :: Double
   ,progress :: Maybe Double
@@ -74,7 +75,8 @@ tripInfoFromResponse res cfg = do
 
 tripInfoFromVehicle :: RouteConf -> Entity Vehicle -> Maybe TripInfo
 tripInfoFromVehicle cfg Entity{
-  attributes = Vehicle{
+  id = vehicle_id
+  ,attributes = Vehicle{
       direction_id = direction_id
       ,latitude = lat
       ,longitude = lon
@@ -98,6 +100,7 @@ tripInfoFromVehicle cfg Entity{
   ,route_id = route_id
   ,direction_id = direction_id
   ,vehicle_label = label
+  ,vehicle_id = vehicle_id
   ,latitude = lat
   ,longitude = lon
   ,progress = case routeConfShape cfg direction_id of

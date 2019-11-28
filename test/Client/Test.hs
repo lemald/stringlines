@@ -96,6 +96,7 @@ goodVehicleTripInfo = TripInfo{
   ,route_id = "77"
   ,direction_id = 1
   ,vehicle_label = "bar"
+  ,vehicle_id = "1234"
   ,latitude = 2.0
   ,longitude = 3.0
   ,progress = Nothing
