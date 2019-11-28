@@ -158,12 +158,12 @@ resultsToPaths ts =
               prepXTime d)
           ) $ fmap toList paths
 
-accumTripInfoMap :: [TripInfo] -> Map.Map TAPI.TripID (Seq (UTCTime, Double))
+accumTripInfoMap :: [TripInfo] -> Map.Map TAPI.VehicleID (Seq (UTCTime, Double))
 accumTripInfoMap ts =
   foldl'
   (\m t ->
      case progress t of
-      Just p -> Map.insertWith (><) (trip_id t) (singleton (timestamp t, p)) m
+      Just p -> Map.insertWith (><) (vehicle_id t) (singleton (timestamp t, p)) m
       Nothing -> m
   )
   Map.empty
