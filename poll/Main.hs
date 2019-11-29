@@ -27,8 +27,8 @@ main = do
   h <- do
     nh <- streamHandler stderr DEBUG
     return $ setFormatter nh (simpleLogFormatter "[$time $prio] $msg")
-  updateGlobalLogger rootLoggerName ((setHandlers [h]) .
-                                     (System.Log.Logger.setLevel INFO))
+  updateGlobalLogger rootLoggerName (setHandlers [h] .
+                                     System.Log.Logger.setLevel INFO)
   r <- runExceptT runner
   case r of
     Left e -> do
@@ -44,7 +44,7 @@ runner = do
   routes <- mapM (\rc ->
                     if maybe False (\x -> length x > 2) (route_cfg_shape_ids rc)
                     then throwError ("More than 2 shape IDs specified for route " ++
-                                     (T.unpack $ route_cfg_id rc))
+                                     T.unpack (route_cfg_id rc))
                     else return (route_cfg_id rc)
                  )
             (cfg_routes cfg)
@@ -79,7 +79,7 @@ runThreads apiKey routeConfs = do
                       (putMVar mvar)
                     return mvar)
            routeConfs
-  mapM_ (\m -> takeMVar m) mvars
+  mapM_ takeMVar mvars
   closeDBCon con
 
 initiateRouteLoop :: RouteConf -> Connection -> T.Text -> IO()
