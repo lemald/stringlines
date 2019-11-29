@@ -54,7 +54,7 @@ invertProgress p s = case shapeDirectionID s of
 shapeToPoints :: TAPI.Shape -> [LatLong]
 shapeToPoints s = let
   line = decodeline (T.unpack $ polyline s)
-  in fmap (\(lat, lon) -> decimalLatLong lat lon) line
+  in fmap (uncurry decimalLatLong) line
 
 shapeDirectionID :: TAPI.Shape -> TAPI.DirectionID
 shapeDirectionID TAPI.Shape{ direction_id = d } = d
