@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE LambdaCase #-}
 
 module Config (
   routeConfRoute
@@ -76,15 +77,16 @@ createRouteConf cfg (routeID, shapeEntities) = do
                 Nothing -> throwError $ "No route configuration for " ++
                            T.unpack routeID
                 Just c -> return c
-  case (route_cfg_shape_ids routeCfg) of
+  case route_cfg_shape_ids routeCfg of
     Nothing -> return $ NoShapeConf routeID
     Just shape_ids -> do
       let maybeShapes = fmap (\i -> (i, attributesByID shapeEntities i)) shape_ids
-      shapes <- mapM (\s -> case s of
-                              (i, Nothing) -> throwError $
-                                "No shape returned by API for ID " ++ T.unpack i
-                              (_, Just s) -> return s
-                         ) maybeShapes
+      shapes <- mapM (\case
+                         (i, Nothing) -> throwError $
+                                         "No shape returned by API for ID "
+                                         ++ T.unpack i
+                         (_, Just s) -> return s
+                     ) maybeShapes
       return $
         case take 2 shapes of
           [a, b] -> TwoShapeConf routeID a b

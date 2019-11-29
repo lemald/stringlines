@@ -33,7 +33,7 @@ import Servant.API
 import Servant.API.ContentTypes
 
 -- Create a new type to accept the content-type returned by the MBTA
-data TJSON = TJSON JSON
+newtype TJSON = TJSON JSON
 
 instance FromJSON a => MimeUnrender TJSON a where
   mimeUnrender _ = eitherDecodeLenient
@@ -60,7 +60,7 @@ type DirectionID = Int
 dropFieldOptions :: Int -> Options
 dropFieldOptions n = defaultOptions { fieldLabelModifier = drop n }
 
-data APIResponse a = APIResponse {
+newtype APIResponse a = APIResponse {
   api_response_data :: [a]
 } deriving (Generic, Show)
 
@@ -76,11 +76,11 @@ data Relationships = Relationships {
   trip :: Maybe (Relationship TripID)
 } deriving (Generic, Eq, Show)
 
-data Relationship a = Relationship {
+newtype Relationship a = Relationship {
   payload :: RelationshipPayload a
 } deriving (Generic, Eq, Show)
 
-data RelationshipPayload a = RelationshipPayload {
+newtype RelationshipPayload a = RelationshipPayload {
   id :: a
 } deriving (Generic, Eq, Show)
 
