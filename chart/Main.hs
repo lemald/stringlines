@@ -98,11 +98,10 @@ makeChartFromParams p = do
   results <- tripInfoByRouteForDay
              con
              (paramRouteID p)
-             ((if paramDir0 p then [0] else []) ++
-              (if paramDir1 p then [1] else []))
+             ([0 | paramDir0 p] ++ [1 | paramDir1 p])
              (paramDate p)
              (hoursToTimeZone $ paramTzOffset p)
-  let paths = (resultsToPaths results)
+  let paths = resultsToPaths results
   plotPathsStyle
     [Key Nothing
     ,XLabel "Time (UTC)"
@@ -135,14 +134,10 @@ argsToParams argv =
          <*> case readMaybe (optTzOffsetStr opts) of
                Nothing -> Left "Invalid time zone offset"
                Just o  -> Right o
-         <*> (Right $ optOutFile opts)
-         <*> (Right $ optDBFile opts)
-         <*> (Right $ if not ((optDir0 opts) || (optDir1 opts))
-                      then True
-                      else (optDir0 opts))
-         <*> (Right $ if not ((optDir0 opts) || (optDir1 opts))
-                      then True
-                      else (optDir1 opts)))
+         <*> Right (optOutFile opts)
+         <*> Right (optDBFile opts)
+         <*> Right ((not (optDir0 opts) || optDir1 opts) || optDir0 opts)
+         <*> Right ((not (optDir0 opts) || optDir1 opts) || optDir1 opts))
     (_, _, errs) -> ioError (userError
                              (concat errs ++ usageInfo header options))
   where header = "Usage: [OPTION...]"
@@ -152,14 +147,14 @@ argsToParams argv =
 resultsToPaths :: [TripInfo] -> [(PlotStyle, [(Double, Double)])]
 resultsToPaths ts =
   let paths = toList $ accumTripInfoMap ts
-  in fmap (\d ->
-             (PlotStyle{plotType = Lines
-                       ,lineSpec = CustomStyle []},
-              prepXTime d)
-          ) $ fmap toList paths
+  in fmap ((\d ->
+              (PlotStyle{plotType = Lines
+                        ,lineSpec = CustomStyle []},
+               prepXTime d)
+           ) . toList) paths
 
 accumTripInfoMap :: [TripInfo] -> Map.Map TAPI.VehicleID (Seq (UTCTime, Double))
-accumTripInfoMap ts =
+accumTripInfoMap =
   foldl'
   (\m t ->
      case progress t of
@@ -167,4 +162,3 @@ accumTripInfoMap ts =
       Nothing -> m
   )
   Map.empty
-  ts
